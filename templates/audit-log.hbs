@@ -1,0 +1,71 @@
+<div class="character-tracker-layout">
+
+    <aside class="character-tracker-sidebar">
+        <nav class="character-tracker-nav">
+            {{#each players}}
+                <button type="button" data-action="scrollToPlayer" data-target="{{this.id}}" class="character-tracker-nav-link">
+                    <i class="character-tracker-icon person"></i>
+                    <span>{{this.name}}</span>
+                </button>
+            {{/each}}
+        </nav>
+
+        <div class="character-tracker-global-actions">
+            <button type="button" data-action="clearAll" class="character-tracker-btn danger">
+                <i class="character-tracker-icon delete"></i>
+                {{localize "character-tracker.ui.clearAll"}}
+            </button>
+        </div>
+    </aside>
+
+    <main class="character-tracker-content">
+        {{#each players}}
+            <section id="character-tracker-player-{{this.id}}" class="character-tracker-player-section">
+
+                <header class="character-tracker-player-header">
+                    <h2 class="character-tracker-player-title">
+                        <i class="character-tracker-icon person"></i>
+                        {{this.name}}
+                    </h2>
+                    <div class="character-tracker-player-actions">
+                        <button
+                            type="button"
+                            data-action="exportPlayer"
+                            data-user-id="{{this.id}}"
+                            class="character-tracker-btn primary"
+                            data-tooltip="{{localize 'character-tracker.ui.exportTooltip'}}"
+                        >
+                            <i class="character-tracker-icon download"></i>
+                        </button>
+                        <button type="button" data-action="clearPlayer" data-user-id="{{this.id}}" class="character-tracker-btn danger" data-tooltip="{{localize 'character-tracker.ui.clearTooltip'}}">
+                            <i class="character-tracker-icon delete"></i>
+                        </button>
+                    </div>
+                </header>
+
+                <div class="character-tracker-logs">
+                    {{#if this.logs.length}}
+                        <ul class="character-tracker-log-list">
+                            {{#each this.logs}}
+                                <li class="character-tracker-log-entry">
+                                    <div class="log-meta">
+                                        <span class="log-time">{{timeSince this.timestamp}}</span>
+                                        <span class="log-actor">{{this.actorName}}</span>
+                                    </div>
+                                    <div class="log-details">
+                                        <span class="log-action">{{this.action}}</span>
+                                        <span class="log-detail-text">{{this.detail}}</span>
+                                    </div>
+                                </li>
+                            {{/each}}
+                        </ul>
+                    {{else}}
+                        <p class="character-tracker-empty">{{localize "character-tracker.ui.noLogs"}}</p>
+                    {{/if}}
+                </div>
+
+            </section>
+        {{/each}}
+    </main>
+
+</div>

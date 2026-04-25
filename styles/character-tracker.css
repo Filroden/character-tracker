@@ -1,0 +1,235 @@
+/* ===================================================================
+   --- MATERIAL DESIGN ICONS ---
+=================================================================== */
+.character-tracker-icon {
+    display: inline-block;
+    width: var(--filroden-font-size-l); 
+    height: var(--filroden-font-size-l);
+    min-width: var(--filroden-font-size-l);
+    background-color: currentColor;
+    background-image: none !important;
+    content: "";
+    transform: scaleX(var(--filroden-dir-flip));
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    margin: 0;
+}
+
+.character-tracker-icon.list     { -webkit-mask-image: url('../icons/fact_check.svg'); mask-image: url('../icons/fact_check.svg'); }
+.character-tracker-icon.person   { -webkit-mask-image: url('../icons/person.svg'); mask-image: url('../icons/person.svg'); }
+.character-tracker-icon.delete   { -webkit-mask-image: url('../icons/delete.svg'); mask-image: url('../icons/delete.svg'); }
+.character-tracker-icon.download { -webkit-mask-image: url('../icons/download.svg'); mask-image: url('../icons/download.svg'); }
+
+/* ===================================================================
+   --- APPLICATION LAYOUT ---
+=================================================================== */
+
+.character-tracker-window.rtl {
+    --filroden-dir-flip: -1;
+}
+
+.character-tracker-window .window-content {
+    padding: 0;
+    overflow: hidden;
+    background-color: var(--filroden-color-bg-darkest);
+    color: var(--filroden-color-text-main);
+    font-family: var(--filroden-font-family);
+}
+
+.character-tracker-window .character-tracker-layout {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+/* --- SIDEBAR --- */
+.character-tracker-window .character-tracker-sidebar {
+    width: 12.5rem; /* ~200px */
+    display: flex;
+    flex-direction: column;
+    background-color: var(--filroden-color-bg-medium-solid);
+    border-inline-end: var(--filroden-border-main);
+}
+
+.character-tracker-window .character-tracker-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--filroden-space-m);
+    display: flex;
+    flex-direction: column;
+    gap: var(--filroden-space-xs);
+}
+
+.character-tracker-window .character-tracker-nav-link {
+    display: flex;
+    align-items: center;
+    gap: var(--filroden-space-s);
+    padding: var(--filroden-space-s);
+    color: var(--filroden-color-text-main);
+    text-decoration: none;
+    border-radius: var(--filroden-radius-small);
+    transition: background-color 0.2s ease;
+    width: 100%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    text-align: start;
+    justify-content: start;
+}
+
+.character-tracker-window .character-tracker-nav-link:hover {
+    background-color: var(--filroden-color-bg-hover);
+    color: var(--filroden-color-text-accent-hover);
+    text-shadow: var(--filroden-shadow-text);
+}
+
+.character-tracker-window .character-tracker-global-actions {
+    padding: var(--filroden-space-m);
+    border-block-start: var(--filroden-border-main);
+}
+
+/* --- MAIN CONTENT --- */
+.character-tracker-window .character-tracker-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--filroden-space-l);
+    scroll-behavior: smooth;
+}
+
+.character-tracker-window .character-tracker-player-section {
+    margin-block-end: 2rem;
+    padding-block-end: 2rem;
+    border-block-end: var(--filroden-border-dashed);
+}
+
+.character-tracker-window .character-tracker-player-section:last-child {
+    border-block-end: none;
+    margin-block-end: 0;
+}
+
+.character-tracker-window .character-tracker-player-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-block-end: var(--filroden-space-l);
+}
+
+.character-tracker-window .character-tracker-player-title {
+    margin: 0;
+    font-size: var(--filroden-font-size-xl);
+    font-weight: var(--filroden-font-weight-bold);
+    color: var(--filroden-color-text-accent);
+    display: flex;
+    align-items: center;
+    gap: var(--filroden-space-s);
+}
+
+.character-tracker-window .character-tracker-player-actions {
+    display: flex;
+    gap: var(--filroden-space-s);
+}
+
+/* --- LOG ENTRIES --- */
+.character-tracker-window .character-tracker-log-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--filroden-space-m);
+}
+
+.character-tracker-window .character-tracker-log-entry {
+    background-color: var(--filroden-color-bg-light);
+    border-radius: var(--filroden-radius-medium);
+    padding: var(--filroden-space-m);
+    box-shadow: var(--filroden-shadow-card);
+    border: var(--filroden-border-dark);
+}
+
+.character-tracker-window .log-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--filroden-font-size-xs);
+    color: var(--filroden-color-text-muted);
+    margin-block-end: var(--filroden-space-xs);
+    border-block-end: 1px solid var(--filroden-color-bg-darkest);
+    padding-block-end: var(--filroden-space-xxs);
+}
+
+.character-tracker-window .log-actor {
+    font-weight: var(--filroden-font-weight-bold);
+    color: var(--filroden-color-text-main);
+}
+
+.character-tracker-window .log-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--filroden-space-xxs);
+}
+
+.character-tracker-window .log-action {
+    font-size: var(--filroden-font-size-m);
+    font-weight: var(--filroden-font-weight-bold);
+    color: var(--filroden-color-text-accent);
+}
+
+.character-tracker-window .log-detail-text {
+    font-size: var(--filroden-font-size-s);
+    color: var(--filroden-color-text-placeholder);
+}
+
+.character-tracker-window .character-tracker-empty {
+    text-align: center;
+    color: var(--filroden-color-text-placeholder);
+    font-style: italic;
+    padding: var(--filroden-space-l);
+    background-color: var(--filroden-color-bg-light);
+    border-radius: var(--filroden-radius-medium);
+}
+
+/* --- BUTTON STYLES --- */
+.character-tracker-window .character-tracker-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--filroden-space-s);
+    padding: var(--filroden-space-s) var(--filroden-space-m);
+    border: none;
+    border-radius: var(--filroden-radius-small);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--filroden-font-size-s);
+    font-weight: var(--filroden-font-weight-bold);
+    transition: all 0.2s ease;
+    background-color: var(--filroden-color-bg-light-solid);
+    color: var(--filroden-color-text-main);
+}
+
+.character-tracker-window .character-tracker-btn:hover {
+    background: var(--filroden-color-bg-hover-solid);
+    border-color: var(--filroden-color-text-accent);
+    color: var(--filroden-color-text-main-solid);
+}
+
+.character-tracker-window .character-tracker-btn.danger {
+    color: var(--filroden-color-danger);
+}
+
+.character-tracker-window .character-tracker-btn.danger:hover {
+    color: var(--filroden-color-danger);
+}
+
+.character-tracker-window .character-tracker-btn.primary {
+    color: var(--filroden-color-text-accent);
+}
+
+.character-tracker-window .character-tracker-btn.primary:hover {
+    color: var(--filroden-color-text-on-accent);
+}
