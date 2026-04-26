@@ -28,6 +28,7 @@ export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
             clearPlayer: AuditLogApp.#handleClearPlayer,
             exportPlayer: AuditLogApp.#handleExportPlayer,
             scrollToPlayer: AuditLogApp.#handleScrollToPlayer,
+            refreshLog: AuditLogApp.#handleRefreshLog,
         },
     };
 
@@ -68,11 +69,23 @@ export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /**
-     * Transforms the flat log array into a structured array grouped by player.
+     * Transforms the flat log array into a structured array grouped by player and character.
      * @returns {Array<object>}
      */
     #buildPlayerContext() {
         const logs = StateManager.getLogs();
+        const playersMap = this.#initializePlayersMap();
+
+        logs.forEach((log) => this.#aggregateLog(playersMap, log));
+
+        return this.#formatContextData(playersMap);
+    }
+
+    /**
+     * Generates the baseline player map with empty statistic containers.
+     * @returns {Map<string, object>}
+     */
+    #initializePlayersMap() {
         const playersMap = new Map();
         const trackGMs = game.settings.get(MODULE_ID, SETTING_KEYS.TRACK_GM);
 
@@ -81,35 +94,91 @@ export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
                 playersMap.set(user.id, {
                     id: user.id,
                     name: user.isGM ? `${user.name} (GM)` : user.name,
-                    logs: [],
+                    stats: { totalChanges: 0, itemsModified: 0, lastActivity: null },
+                    charactersMap: new Map(),
                 });
             }
         });
 
-        logs.forEach((log) => {
-            if (playersMap.has(log.userId)) {
-                // Create a shallow copy to safely mutate the UI data without altering the database
-                const displayLog = { ...log };
+        return playersMap;
+    }
 
-                // Dynamically translate system data keys at render time
-                if (displayLog.action === "Data Modified") {
-                    displayLog.detail = displayLog.detail
-                        .split(" | ")
-                        .map((part) => {
-                            const [rawKey, val] = part.split(" ➔ ");
-                            if (val !== undefined && rawKey.startsWith("system.")) {
-                                return `${SystemMapper.translate(rawKey)} ➔ ${val}`;
-                            }
-                            return part;
-                        })
-                        .join(" | ");
+    /**
+     * Processes a single log entry, updating stats and sorting it into the correct character bin.
+     */
+    #aggregateLog(playersMap, log) {
+        const player = playersMap.get(log.userId);
+        if (!player) return;
+
+        const displayLog = this.#translateLog(log);
+
+        this.#updatePlayerStats(player.stats, displayLog);
+        this.#assignLogToCharacter(player.charactersMap, displayLog);
+    }
+
+    /**
+     * Safely translates system keys for UI presentation without mutating the database object.
+     */
+    #translateLog(log) {
+        const displayLog = { ...log };
+
+        if (displayLog.action !== "Data Modified") return displayLog;
+
+        displayLog.detail = displayLog.detail
+            .split(" | ")
+            .map((part) => {
+                const [rawKey, val] = part.split(" ➔ ");
+
+                if (val !== undefined && rawKey.startsWith("system.")) {
+                    const translatedKey = SystemMapper.translate(rawKey);
+
+                    // Appends the raw key in brackets only if a translation was successfully found
+                    const displayKey = translatedKey === rawKey ? rawKey : `${translatedKey} (${rawKey})`;
+
+                    return `${displayKey} ➔ ${val}`;
                 }
+                return part;
+            })
+            .join(" | ");
 
-                playersMap.get(log.userId).logs.push(displayLog);
-            }
+        return displayLog;
+    }
+
+    /**
+     * Increments the high-level statistics for a player.
+     */
+    #updatePlayerStats(stats, log) {
+        stats.totalChanges++;
+
+        // Logs are chronological; overwriting this continuously yields the most recent timestamp
+        stats.lastActivity = log.timestamp;
+    }
+
+    /**
+     * Groups a log into the specific character's array.
+     */
+    #assignLogToCharacter(charactersMap, log) {
+        if (!charactersMap.has(log.actorName)) {
+            charactersMap.set(log.actorName, {
+                name: log.actorName,
+                logs: [],
+            });
+        }
+        charactersMap.get(log.actorName).logs.push(log);
+    }
+
+    /**
+     * Converts the Maps into flat Arrays for Handlebars iteration.
+     */
+    #formatContextData(playersMap) {
+        const contextArray = Array.from(playersMap.values());
+
+        contextArray.forEach((player) => {
+            player.characters = Array.from(player.charactersMap.values());
+            delete player.charactersMap;
         });
 
-        return Array.from(playersMap.values());
+        return contextArray;
     }
 
     /**
@@ -156,5 +225,12 @@ export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
         if (!section) return;
 
         section.scrollIntoView({ behavior: "smooth" });
+    }
+
+    /**
+     * Action handler: Manually recalculates state and refreshes the application UI.
+     */
+    static async #handleRefreshLog(event, target) {
+        await this.render({ force: false });
     }
 }

@@ -23,6 +23,7 @@
 .character-tracker-icon.person   { -webkit-mask-image: url('../icons/person.svg'); mask-image: url('../icons/person.svg'); }
 .character-tracker-icon.delete   { -webkit-mask-image: url('../icons/delete.svg'); mask-image: url('../icons/delete.svg'); }
 .character-tracker-icon.download { -webkit-mask-image: url('../icons/download.svg'); mask-image: url('../icons/download.svg'); }
+.character-tracker-icon.refresh { -webkit-mask-image: url('../icons/refresh.svg'); mask-image: url('../icons/refresh.svg'); }
 
 /* ===================================================================
    --- ACTOR SIDEBAR ---
@@ -63,6 +64,26 @@
 
 .character-tracker-window .character-tracker-window-scrollable::-webkit-scrollbar-button {
     display: none;
+}
+
+/* ===================================================================
+   --- TOOLTIPS ---
+=================================================================== */
+
+#tooltip.character-tracker-tooltip {
+    max-width: 300px !important;
+    border: 1px solid var(--filroden-color-text-accent);
+    border-radius: var(--filroden-radius-small);
+    padding: var(--filroden-space-s);
+    background: var(--filroden-color-bg-darkest);
+    color: var(--filroden-color-text-main-solid);
+    box-shadow: var(--filroden-shadow-popout);
+    font-family: var(--filroden-font-family);
+    font-size: var(--filroden-font-size-s);
+    line-height: 1.4;
+    text-align: start;
+    z-index: var(--z-index-tooltip, 9999);
+    margin-top: var(--filroden-space-m);
 }
 
 /* ===================================================================
@@ -177,6 +198,9 @@
 }
 
 .character-tracker-window .character-tracker-global-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--filroden-space-s);
     padding-block-start: var(--filroden-space-l);
     border-block-start: 1px solid var(--filroden-color-text-accent);
 }
@@ -347,4 +371,82 @@
 
 .character-tracker-window .character-tracker-btn.primary:hover {
     color: var(--filroden-color-text-accent);
+}
+
+/* --- STATISTICS BAR --- */
+.character-tracker-window .character-tracker-stats-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--filroden-space-m);
+    background-color: var(--filroden-color-bg-light);
+    border-radius: var(--filroden-radius-small);
+    padding: var(--filroden-space-s) var(--filroden-space-m);
+    margin-block-end: var(--filroden-space-m);
+    font-size: var(--filroden-font-size-xs);
+    border: 1px solid var(--filroden-color-border);
+}
+
+.character-tracker-window .stat-badge {
+    color: var(--filroden-color-text-main);
+}
+
+/* --- ACCORDION --- */
+.character-tracker-window .character-tracker-characters {
+    display: flex;
+    flex-direction: column;
+    gap: var(--filroden-space-m);
+}
+
+.character-tracker-window .character-tracker-accordion {
+    background: transparent;
+}
+
+.character-tracker-window .accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--filroden-color-bg-hover);
+    padding: var(--filroden-space-s) var(--filroden-space-m);
+    border-radius: var(--filroden-radius-small);
+    cursor: pointer;
+    font-weight: var(--filroden-font-weight-bold);
+    color: var(--filroden-color-text-accent);
+    margin-block-end: var(--filroden-space-s);
+    user-select: none;
+    transition: background-color 0.2s ease;
+    list-style: none; /* Removes native browser arrows */
+}
+
+.character-tracker-window .accordion-header::-webkit-details-marker {
+    display: none; /* Removes native Safari/Chrome arrows */
+}
+
+.character-tracker-window .accordion-header:hover {
+    background-color: var(--filroden-color-bg-hover-solid);
+}
+
+.character-tracker-window .accordion-title {
+    display: flex;
+    align-items: center;
+    gap: var(--filroden-space-s);
+}
+
+.character-tracker-window .accordion-count {
+    background-color: var(--filroden-color-bg-darkest);
+    color: var(--filroden-color-text-muted);
+    padding: 2px 8px;
+    border-radius: var(--filroden-radius-large);
+    font-size: var(--filroden-font-size-xs);
+}
+
+/* Updates the layout of log items nested within the accordion */
+.character-tracker-window .character-tracker-accordion .character-tracker-log-list {
+    padding-inline-start: var(--filroden-space-m);
+}
+
+.character-tracker-window .character-tracker-accordion .log-summary {
+    display: flex;
+    align-items: baseline;
+    gap: var(--filroden-space-s);
+    margin-block-end: var(--filroden-space-xxs);
 }

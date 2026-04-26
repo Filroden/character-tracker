@@ -190,10 +190,22 @@ function extractUpdateDetails(update) {
         const flatSystem = foundry.utils.flattenObject(update.system);
 
         for (const [key, value] of Object.entries(flatSystem)) {
-            const displayValue = typeof value === "object" && value !== null ? "[Object]" : value;
-            details.push(`system.${key} ➔ ${displayValue}`);
+            details.push(`system.${key} ➔ ${formatDisplayValue(value)}`);
         }
     }
 
     return details;
+}
+
+/**
+ * Formats a raw database value into a safe, readable string for the UI.
+ * @param {*} value - The raw value from the database delta.
+ * @returns {string|number|boolean} - The formatted display value.
+ */
+function formatDisplayValue(value) {
+    if (value === "") return '""';
+    if (value === null) return "null";
+    if (typeof value === "object") return "[Object]";
+
+    return value;
 }
