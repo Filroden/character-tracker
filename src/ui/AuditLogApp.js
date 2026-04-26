@@ -4,6 +4,7 @@
 
 import { StateManager } from "../data/StateManager.js";
 import { exportPlayerLogs } from "../utils/exportHelpers.js";
+import { MODULE_ID, SETTING_KEYS } from "../config/settings.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -18,7 +19,7 @@ export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
             resizable: true,
         },
         position: {
-            width: 650,
+            width: 900,
             height: 500,
         },
         actions: {
@@ -72,12 +73,14 @@ export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
     #buildPlayerContext() {
         const logs = StateManager.getLogs();
         const playersMap = new Map();
+        const trackGMs = game.settings.get(MODULE_ID, SETTING_KEYS.TRACK_GM);
 
+        // Dynamically include the GM in the sidebar if tracking is enabled
         game.users.forEach((user) => {
-            if (!user.isGM) {
+            if (!user.isGM || trackGMs) {
                 playersMap.set(user.id, {
                     id: user.id,
-                    name: user.name,
+                    name: user.isGM ? `${user.name} (GM)` : user.name, // Adds a helpful tag to the UI
                     logs: [],
                 });
             }

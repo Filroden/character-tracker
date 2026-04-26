@@ -3,6 +3,7 @@
  */
 
 import { StateManager } from "../data/StateManager.js";
+import { MODULE_ID, SETTING_KEYS } from "../config/settings.js";
 
 /**
  * Registers the required document hooks.
@@ -10,23 +11,40 @@ import { StateManager } from "../data/StateManager.js";
  */
 export function registerDocumentWatchers() {
     Hooks.on("createItem", handleItemCreation);
+    Hooks.on("updateItem", handleItemUpdate);
     Hooks.on("deleteItem", handleItemDeletion);
+    Hooks.on("createActiveEffect", handleEffectCreation);
+    Hooks.on("deleteActiveEffect", handleEffectDeletion);
     Hooks.on("updateActor", handleActorUpdate);
 }
 
 /**
  * Validates if the current client should process this event based on user permissions.
- * @param {string} initiatingUserId - The ID of the user who triggered the event.
+ * @param {string} actionAuthorId - The ID of the user who triggered the event.
  * @returns {boolean} - True if this client should process the log.
  */
-function shouldProcessLog(initiatingUserId) {
-    if (game.users.activeGM?.id !== game.user.id) return false;
+function shouldProcessLog(actionAuthorId) {
+    // 1. THE BROWSER GUARD: Only the GM's browser should process logs to prevent duplicates
+    const currentBrowserUserId = game.user.id;
+    if (game.users.activeGM?.id !== currentBrowserUserId) return false;
 
-    const initiatingUser = game.users.get(initiatingUserId);
-    if (!initiatingUser || initiatingUser.isGM) return false;
+    // 2. THE AUTHOR GUARD: Check who actually made the change
+    const actionAuthor = game.users.get(actionAuthorId);
+    if (!actionAuthor) return false;
 
+    // If the person who made the change is a GM, check the module settings
+    if (actionAuthor.isGM) {
+        const trackGMs = game.settings.get(MODULE_ID, SETTING_KEYS.TRACK_GM);
+        if (!trackGMs) return false; // Ignore the GM's action if the setting is off
+    }
+
+    // If we reach this point, it was either a Player action, or a GM action with tracking enabled
     return true;
 }
+
+/* ===================================================================
+   --- ITEM WATCHERS ---
+=================================================================== */
 
 /**
  * Handles the creation of an embedded Item.
@@ -35,11 +53,32 @@ function handleItemCreation(item, options, userId) {
     if (!shouldProcessLog(userId)) return;
     if (item.parent?.documentName !== "Actor") return;
     if (item.parent.isToken) return;
+    if (!item.parent.hasPlayerOwner) return;
 
     const logEntry = {
         userId: userId,
         actorName: item.parent.name,
         action: "Item Added",
+        detail: item.name,
+        timestamp: Date.now(),
+    };
+
+    StateManager.addLog(logEntry);
+}
+
+/**
+ * Handles the modification of an existing embedded Item.
+ */
+function handleItemUpdate(item, update, options, userId) {
+    if (!shouldProcessLog(userId)) return;
+    if (item.parent?.documentName !== "Actor") return;
+    if (item.parent.isToken) return;
+    if (!item.parent.hasPlayerOwner) return;
+
+    const logEntry = {
+        userId: userId,
+        actorName: item.parent.name,
+        action: "Item Modified",
         detail: item.name,
         timestamp: Date.now(),
     };
@@ -54,6 +93,7 @@ function handleItemDeletion(item, options, userId) {
     if (!shouldProcessLog(userId)) return;
     if (item.parent?.documentName !== "Actor") return;
     if (item.parent.isToken) return;
+    if (!item.parent.hasPlayerOwner) return;
 
     const logEntry = {
         userId: userId,
@@ -66,21 +106,23 @@ function handleItemDeletion(item, options, userId) {
     StateManager.addLog(logEntry);
 }
 
-/**
- * Handles modifications to the Actor document.
- */
-function handleActorUpdate(actor, update, options, userId) {
-    if (!shouldProcessLog(userId)) return;
-    if (actor.isToken) return;
+/* ===================================================================
+   --- ACTIVE EFFECT WATCHERS ---
+=================================================================== */
 
-    const categories = extractUpdateCategories(update);
-    if (categories.length === 0) return;
+/**
+ * Handles the creation of an embedded Active Effect.
+ */
+function handleEffectCreation(effect, options, userId) {
+    if (!shouldProcessLog(userId)) return;
+    if (effect.parent?.documentName !== "Actor") return;
+    if (effect.parent.isToken) return;
 
     const logEntry = {
         userId: userId,
-        actorName: actor.name,
-        action: "Data Modified",
-        detail: `Updated areas: ${categories.join(", ")}`,
+        actorName: effect.parent.name,
+        action: "Active Effect Added",
+        detail: effect.name,
         timestamp: Date.now(),
     };
 
@@ -88,27 +130,69 @@ function handleActorUpdate(actor, update, options, userId) {
 }
 
 /**
- * Examines the update object keys to broadly categorise what changed.
- * @param {object} update - The diff object provided by the hook.
- * @returns {Array<string>} - A list of modified categories.
+ * Handles the deletion of an embedded Active Effect.
  */
-function extractUpdateCategories(update) {
-    const categories = [];
+function handleEffectDeletion(effect, options, userId) {
+    if (!shouldProcessLog(userId)) return;
+    if (effect.parent?.documentName !== "Actor") return;
+    if (effect.parent.isToken) return;
 
-    // Captures top-level Foundry document changes
-    if (update.name) categories.push("Core Name");
-    if (update.prototypeToken) categories.push("Token Settings");
+    const logEntry = {
+        userId: userId,
+        actorName: effect.parent.name,
+        action: "Active Effect Removed",
+        detail: effect.name,
+        timestamp: Date.now(),
+    };
 
-    // Looks one level into the system data for better context
+    StateManager.addLog(logEntry);
+}
+
+/* ===================================================================
+   --- ACTOR WATCHERS ---
+=================================================================== */
+
+/**
+ * Handles modifications to the Actor document.
+ */
+function handleActorUpdate(actor, update, options, userId) {
+    if (!shouldProcessLog(userId)) return;
+    if (actor.isToken) return;
+    if (!actor.hasPlayerOwner) return;
+
+    const details = extractUpdateDetails(update);
+    if (details.length === 0) return;
+
+    const logEntry = {
+        userId: userId,
+        actorName: actor.name,
+        action: "Data Modified",
+        detail: details.join(" | "),
+        timestamp: Date.now(),
+    };
+
+    StateManager.addLog(logEntry);
+}
+
+/**
+ * Examines the update object and extracts flattened keys and their new values.
+ * @param {object} update - The diff object provided by the hook.
+ * @returns {Array<string>} - A formatted list of exact changes.
+ */
+function extractUpdateDetails(update) {
+    const details = [];
+
+    if (update.name) details.push(`Name ➔ ${update.name}`);
+    if (update.prototypeToken) details.push("Token Settings Modified");
+
     if (update.system) {
-        const systemModifiedKeys = Object.keys(update.system);
+        const flatSystem = foundry.utils.flattenObject(update.system);
 
-        if (systemModifiedKeys.length > 0) {
-            categories.push(`System (${systemModifiedKeys.join(", ")})`);
-        } else {
-            categories.push("System Mechanics");
+        for (const [key, value] of Object.entries(flatSystem)) {
+            const displayValue = typeof value === "object" && value !== null ? "[Object]" : value;
+            details.push(`system.${key} ➔ ${displayValue}`);
         }
     }
 
-    return categories;
+    return details;
 }

@@ -25,11 +25,84 @@
 .character-tracker-icon.download { -webkit-mask-image: url('../icons/download.svg'); mask-image: url('../icons/download.svg'); }
 
 /* ===================================================================
+   --- ACTOR SIDEBAR ---
+=================================================================== */
+
+.character-tracker-sidebar-btn {
+    flex: 0.25;
+}
+
+/* ===================================================================
+   --- APPLICATION SCROLLBARS ---
+=================================================================== */
+
+.character-tracker-window * {
+    scrollbar-width: auto !important;
+    scrollbar-color: auto !important;
+}
+
+.character-tracker-window .character-tracker-window-scrollable::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+}
+
+.character-tracker-window .character-tracker-window-scrollable::-webkit-scrollbar-track {
+    background: var(--filroden-color-bg-hover-solid) !important;
+    border-radius: var(--filroden-radius-large) !important;
+}
+
+.character-tracker-window .character-tracker-window-scrollable::-webkit-scrollbar-thumb {
+    background-color: var(--filroden-color-text-accent) !important;
+    border-radius: var(--filroden-radius-large) !important;
+    border: 1px solid rgba(0, 0, 0, 0.6) !important;
+}
+
+.character-tracker-window .character-tracker-window-scrollable::-webkit-scrollbar-thumb:hover {
+    background-color: var(--filroden-color-text-accent-hover) !important;
+}
+
+.character-tracker-window .character-tracker-window-scrollable::-webkit-scrollbar-button {
+    display: none;
+}
+
+/* ===================================================================
    --- APPLICATION LAYOUT ---
 =================================================================== */
 
+.character-tracker-window {
+    font-family: var(--filroden-font-family) !important;
+    font-size: var(--filroden-font-size-s);
+    --filroden-dir-flip: 1;
+}
+
 .character-tracker-window.rtl {
     --filroden-dir-flip: -1;
+}
+
+.character-tracker-window .window-header {
+    background: var(--filroden-color-bg-darkest) !important;
+    border: none !important;
+    color: var(--filroden-color-text-main-solid);
+    flex: 0 0 auto !important; 
+    min-height: 34px; 
+    height: auto !important;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.character-tracker-window .window-header .window-title {
+    font-size: var(--filroden-font-size-s);
+    line-height: 1.2;
+    text-align: start; 
+    padding-inline-start: var(--filroden-space-s);
+    padding-inline-end: 0;
+    flex: 1;
+}
+
+.character-tracker-window .window-header .window-icon {
+    margin-inline-start: var(--filroden-space-xxs);
+    margin-inline-end: 0;
 }
 
 .character-tracker-window .window-content {
@@ -51,8 +124,23 @@
     width: 12.5rem; /* ~200px */
     display: flex;
     flex-direction: column;
-    background-color: var(--filroden-color-bg-medium-solid);
-    border-inline-end: var(--filroden-border-main);
+    padding: var(--filroden-space-m);
+    gap: var(--filroden-space-m);
+    background-color: var(--filroden-color-bg-darkest);
+    border-inline-end: 1px solid var(--filroden-color-border);
+}
+
+.character-tracker-window .character-tracker-sidebar-header {
+    border-bottom: 2px solid var(--filroden-color-text-accent);
+    font-family: var(--font-primary);
+    font-size: var(--filroden-font-size-m);
+    font-weight: var(--filroden-font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--filroden-color-text-main-solid);
+    margin-block-end: var(--filroden-space-s);
+    padding-block-end: var(--filroden-space-xs);
+    line-height: 1;
 }
 
 .character-tracker-window .character-tracker-nav {
@@ -68,7 +156,6 @@
     display: flex;
     align-items: center;
     gap: var(--filroden-space-s);
-    padding: var(--filroden-space-s);
     color: var(--filroden-color-text-main);
     text-decoration: none;
     border-radius: var(--filroden-radius-small);
@@ -90,8 +177,8 @@
 }
 
 .character-tracker-window .character-tracker-global-actions {
-    padding: var(--filroden-space-m);
-    border-block-start: var(--filroden-border-main);
+    padding-block-start: var(--filroden-space-l);
+    border-block-start: 1px solid var(--filroden-color-text-accent);
 }
 
 /* --- MAIN CONTENT --- */
@@ -103,8 +190,8 @@
 }
 
 .character-tracker-window .character-tracker-player-section {
-    margin-block-end: 2rem;
-    padding-block-end: 2rem;
+    margin-block-end: 1rem;
+    padding-block-end: 1rem;
     border-block-end: var(--filroden-border-dashed);
 }
 
@@ -114,15 +201,30 @@
 }
 
 .character-tracker-window .character-tracker-player-header {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: var(--filroden-color-bg-darkest);
+    padding: var(--filroden-space-xs) 0;
+    margin: 0 0 var(--filroden-space-s) 0;
+    border-radius: var(--filroden-radius-small);
+    border-bottom: 2px solid var(--filroden-color-text-accent);
+    color: var(--filroden-color-text-accent);
+    font-size: var(--filroden-font-size-s);
+    font-weight: var(--filroden-font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-block-end: var(--filroden-space-l);
+    justify-content: space-between;
+    height: 3rem;
+    gap: var(--filroden-space-s);
+    box-shadow: var(--filroden-shadow-popout);
 }
 
 .character-tracker-window .character-tracker-player-title {
     margin: 0;
-    font-size: var(--filroden-font-size-xl);
+    font-size: var(--filroden-font-size-s);
     font-weight: var(--filroden-font-weight-bold);
     color: var(--filroden-color-text-accent);
     display: flex;
@@ -142,47 +244,43 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--filroden-space-m);
+    gap: var(--filroden-space-s);
 }
 
 .character-tracker-window .character-tracker-log-entry {
     background-color: var(--filroden-color-bg-light);
     border-radius: var(--filroden-radius-medium);
-    padding: var(--filroden-space-m);
+    padding: var(--filroden-space-s) var(--filroden-space-m);
     box-shadow: var(--filroden-shadow-card);
     border: var(--filroden-border-dark);
 }
 
-.character-tracker-window .log-meta {
+.character-tracker-window .log {
     display: flex;
-    justify-content: space-between;
-    font-size: var(--filroden-font-size-xs);
+    align-items: baseline;
+    gap: var(--filroden-space-s);
+    margin-block-end: var(--filroden-space-xxs);
+    font-size: var(--filroden-font-size-s);
+}
+
+.character-tracker-window .log-time {
     color: var(--filroden-color-text-muted);
-    margin-block-end: var(--filroden-space-xs);
-    border-block-end: 1px solid var(--filroden-color-bg-darkest);
-    padding-block-end: var(--filroden-space-xxs);
+    font-size: var(--filroden-font-size-xs);
 }
 
 .character-tracker-window .log-actor {
     font-weight: var(--filroden-font-weight-bold);
-    color: var(--filroden-color-text-main);
-}
-
-.character-tracker-window .log-details {
-    display: flex;
-    flex-direction: column;
-    gap: var(--filroden-space-xxs);
+    color: var(--filroden-color-text-muted);
 }
 
 .character-tracker-window .log-action {
-    font-size: var(--filroden-font-size-m);
     font-weight: var(--filroden-font-weight-bold);
     color: var(--filroden-color-text-accent);
+    text-transform: uppercase;
 }
 
 .character-tracker-window .log-detail-text {
-    font-size: var(--filroden-font-size-s);
-    color: var(--filroden-color-text-placeholder);
+    color: var(--filroden-color-text-main-solid);
 }
 
 .character-tracker-window .character-tracker-empty {
@@ -195,21 +293,37 @@
 }
 
 /* --- BUTTON STYLES --- */
+.character-tracker-window button {
+    background: var(--filroden-color-bg-light-solid);
+    border: 1px solid var(--filroden-color-border);
+    color: var(--filroden-color-text-main-solid);
+    border-radius: var(--filroden-radius-small);
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.1s ease;
+}
+
+.character-tracker-window button:hover {
+    background: var(--filroden-color-bg-hover-solid);
+    border-color: var(--filroden-color-text-accent);
+    box-shadow: none;
+}
+
+.character-tracker-window *:focus-visible,
+.character-tracker-window button:focus {
+    outline: 2px solid var(--filroden-color-text-accent);
+    border-radius: var(--filroden-radius-small);
+}
+
 .character-tracker-window .character-tracker-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--filroden-space-s);
-    padding: var(--filroden-space-s) var(--filroden-space-m);
-    border: none;
-    border-radius: var(--filroden-radius-small);
-    cursor: pointer;
     font-family: inherit;
     font-size: var(--filroden-font-size-s);
     font-weight: var(--filroden-font-weight-bold);
-    transition: all 0.2s ease;
-    background-color: var(--filroden-color-bg-light-solid);
-    color: var(--filroden-color-text-main);
+    gap: var(--filroden-space-s);
+    padding: var(--filroden-space-s) var(--filroden-space-m);
 }
 
 .character-tracker-window .character-tracker-btn:hover {
@@ -220,6 +334,7 @@
 
 .character-tracker-window .character-tracker-btn.danger {
     color: var(--filroden-color-danger);
+    width: 100%;
 }
 
 .character-tracker-window .character-tracker-btn.danger:hover {
@@ -231,5 +346,5 @@
 }
 
 .character-tracker-window .character-tracker-btn.primary:hover {
-    color: var(--filroden-color-text-on-accent);
+    color: var(--filroden-color-text-accent);
 }

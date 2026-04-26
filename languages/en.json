@@ -1,11 +1,15 @@
 {
-    "character-tracker.ui.buttonTooltip": "View Character Logs",
+    "character-tracker.ui.buttonTooltip": "View Character Change Logs",
     "character-tracker.ui.windowTitle": "Character Tracker",
+    "character-tracker.ui.players": "Players",
     "character-tracker.ui.clearAll": "Clear All Logs",
     "character-tracker.ui.exportTooltip": "Export Player Logs to Text File",
     "character-tracker.ui.clearTooltip": "Clear Player Logs",
     "character-tracker.ui.noLogs": "No recent activity recorded for this player.",
 
     "character-tracker.settings.logStore.name": "Character Tracker Log Store",
-    "character-tracker.settings.logStore.hint": "Hidden database storage for character audit logs."
+    "character-tracker.settings.logStore.hint": "Hidden database storage for character audit logs.",
+
+    "character-tracker.settings.trackGM.name": "Track GM Changes",
+    "character-tracker.settings.trackGM.hint": "If enabled, the tracker will also record modifications made by GMs to player-owned characters."
 }

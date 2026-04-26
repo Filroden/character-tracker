@@ -1,7 +1,8 @@
 <div class="character-tracker-layout">
 
     <aside class="character-tracker-sidebar">
-        <nav class="character-tracker-nav">
+        <nav class="character-tracker-nav character-tracker-window-scrollable">
+            <h2 class="character-tracker-sidebar-header">{{localize "character-tracker.ui.players"}}</h2>
             {{#each players}}
                 <button type="button" data-action="scrollToPlayer" data-target="{{this.id}}" class="character-tracker-nav-link">
                     <i class="character-tracker-icon person"></i>
@@ -18,15 +19,15 @@
         </div>
     </aside>
 
-    <main class="character-tracker-content">
+    <main class="character-tracker-content character-tracker-window-scrollable">
         {{#each players}}
             <section id="character-tracker-player-{{this.id}}" class="character-tracker-player-section">
 
                 <header class="character-tracker-player-header">
-                    <h2 class="character-tracker-player-title">
+                    <div class="character-tracker-player-title">
                         <i class="character-tracker-icon person"></i>
                         {{this.name}}
-                    </h2>
+                    </div>
                     <div class="character-tracker-player-actions">
                         <button
                             type="button"
@@ -48,11 +49,9 @@
                         <ul class="character-tracker-log-list">
                             {{#each this.logs}}
                                 <li class="character-tracker-log-entry">
-                                    <div class="log-meta">
-                                        <span class="log-time">{{timeSince this.timestamp}}</span>
+                                    <div class="log">
+                                        <span class="log-time">[{{timeSince this.timestamp}}]</span>
                                         <span class="log-actor">{{this.actorName}}</span>
-                                    </div>
-                                    <div class="log-details">
                                         <span class="log-action">{{this.action}}</span>
                                         <span class="log-detail-text">{{this.detail}}</span>
                                     </div>

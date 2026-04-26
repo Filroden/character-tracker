@@ -43,7 +43,7 @@ function createAuditButton() {
     button.dataset.tooltip = game.i18n.localize("character-tracker.ui.buttonTooltip");
 
     const icon = document.createElement("i");
-    icon.className = "fas fa-clipboard-list";
+    icon.className = "character-tracker-icon list";
     button.appendChild(icon);
 
     button.addEventListener("click", handleAuditButtonClick);
