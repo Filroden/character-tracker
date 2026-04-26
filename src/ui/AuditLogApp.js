@@ -5,6 +5,7 @@
 import { StateManager } from "../data/StateManager.js";
 import { exportPlayerLogs } from "../utils/exportHelpers.js";
 import { MODULE_ID, SETTING_KEYS } from "../config/settings.js";
+import { SystemMapper } from "../systems/SystemMapper.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -75,12 +76,11 @@ export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
         const playersMap = new Map();
         const trackGMs = game.settings.get(MODULE_ID, SETTING_KEYS.TRACK_GM);
 
-        // Dynamically include the GM in the sidebar if tracking is enabled
         game.users.forEach((user) => {
             if (!user.isGM || trackGMs) {
                 playersMap.set(user.id, {
                     id: user.id,
-                    name: user.isGM ? `${user.name} (GM)` : user.name, // Adds a helpful tag to the UI
+                    name: user.isGM ? `${user.name} (GM)` : user.name,
                     logs: [],
                 });
             }
@@ -88,7 +88,24 @@ export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
         logs.forEach((log) => {
             if (playersMap.has(log.userId)) {
-                playersMap.get(log.userId).logs.push(log);
+                // Create a shallow copy to safely mutate the UI data without altering the database
+                const displayLog = { ...log };
+
+                // Dynamically translate system data keys at render time
+                if (displayLog.action === "Data Modified") {
+                    displayLog.detail = displayLog.detail
+                        .split(" | ")
+                        .map((part) => {
+                            const [rawKey, val] = part.split(" ➔ ");
+                            if (val !== undefined && rawKey.startsWith("system.")) {
+                                return `${SystemMapper.translate(rawKey)} ➔ ${val}`;
+                            }
+                            return part;
+                        })
+                        .join(" | ");
+                }
+
+                playersMap.get(log.userId).logs.push(displayLog);
             }
         });
 

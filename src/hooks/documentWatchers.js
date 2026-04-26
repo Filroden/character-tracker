@@ -4,6 +4,7 @@
 
 import { StateManager } from "../data/StateManager.js";
 import { MODULE_ID, SETTING_KEYS } from "../config/settings.js";
+import { SystemMapper } from "../systems/SystemMapper.js";
 
 /**
  * Registers the required document hooks.

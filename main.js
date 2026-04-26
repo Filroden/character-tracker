@@ -7,6 +7,7 @@ import { registerSettings } from "./src/config/settings.js";
 import { StateManager } from "./src/data/StateManager.js";
 import { registerDocumentWatchers } from "./src/hooks/documentWatchers.js";
 import { registerSidebarInjection } from "./src/ui/sidebarInjection.js";
+import { SystemMapper } from "./src/systems/SystemMapper.js";
 
 /**
  * Hook listeners for the Foundry lifecycle.
@@ -33,5 +34,6 @@ function readyModule() {
     console.log("Character Tracker | Module ready.");
 
     StateManager.initialize();
+    SystemMapper.initialize();
     registerDocumentWatchers();
 }
