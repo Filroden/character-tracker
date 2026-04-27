@@ -3,34 +3,48 @@
  */
 
 export const rmuDictionary = {
+    // Player
+    "system.player.name": "RMU.NameHeader.PlayerPlaceholder",
+    "system.player.campaign": "RMU.NameHeader.CampaignPlaceholder",
+
     // Health & Power
-    "system.health.hp.value": "rmu.health.hp",
-    "system.health.hp.max": "rmu.health.hp",
-    "system.health.power.value": "rmu.health.power",
-    "system.health.innatePower.value": "RMU.Vitals.InnatePP",
+    "system.health.hp": "rmu.health.hp",
+    "system.health.power": "rmu.health.power",
+    "system.health.innatePower": "RMU.Vitals.InnatePP",
 
     // Experience & Progression
     "system.experience.level": "RMU.Terms.Level",
     "system.experience.xp": "RMU.Terms.XP",
-    "system.powerLevel": "RMU.Terms.PowerLevel",
     "system.experience.carryOverDP": "RMU.Terms.BankedDP",
+    "system.powerLevel": "RMU.Terms.PowerLevel",
 
-    // Appearance & Identity
-    "system.appearance.sex": "RMU.Terms.SexColon",
+    // Appearance
+    "system.appearance.sex": "RMU.Terms.Sex",
     "system.appearance.age": "RMU.Terms.AgeColon",
-    "system.identity.faith": "RMU.Terms.FaithColon",
+    "system.appearance.weight": "RMU.Terms.Weight",
+    "system.appearance.height": "RMU.Terms.Height",
+    "system.appearance.skin": "RMU.Terms.SkinColon",
+    "system.appearance.hair": "RMU.Terms.HairColon",
+    "system.appearance.eyes": "RMU.Terms.EyesColon",
+    "system.appearance.voice": "RMU.Terms.VoiceColon",
+    "system.appearance.conbatZoneFactor": "RMU.Terms.CombatZoneScaleFactor",
 
-    // Core Stats (Mapping the 'tmp' value as the primary tracked stat)
-    "system.stats.Ag.tmp": "rmu.statsName.Ag",
-    "system.stats.Co.tmp": "rmu.statsName.Co",
-    "system.stats.Em.tmp": "rmu.statsName.Em",
-    "system.stats.In.tmp": "rmu.statsName.In",
-    "system.stats.Me.tmp": "rmu.statsName.Me",
-    "system.stats.Pr.tmp": "rmu.statsName.Pr",
-    "system.stats.Qu.tmp": "rmu.statsName.Qu",
-    "system.stats.Re.tmp": "rmu.statsName.Re",
-    "system.stats.SD.tmp": "rmu.statsName.SD",
-    "system.stats.St.tmp": "rmu.statsName.St",
+    // Identity
+    "system.identity.gender": "RMU.Terms.GenderColon",
+    "system.identity.faith": "RMU.Terms.FaithColon",
+    "system.identity.bio": "RMU.Terms.BiographyLabel",
+
+    // Core Stats
+    "system.stats.Ag": "rmu.statsName.Ag",
+    "system.stats.Co": "rmu.statsName.Co",
+    "system.stats.Em": "rmu.statsName.Em",
+    "system.stats.In": "rmu.statsName.In",
+    "system.stats.Me": "rmu.statsName.Me",
+    "system.stats.Pr": "rmu.statsName.Pr",
+    "system.stats.Qu": "rmu.statsName.Qu",
+    "system.stats.Re": "rmu.statsName.Re",
+    "system.stats.SD": "rmu.statsName.SD",
+    "system.stats.St": "rmu.statsName.St",
 
     // Additional RMU keys can be mapped directly to their native i18n strings here
 };

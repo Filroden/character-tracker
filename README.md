@@ -1,7 +1,7 @@
 # Character Tracker
 
 ![Latest Version](https://img.shields.io/badge/Version-1.0.0-blue)
-![Foundry Version](https://img.shields.io/badge/Foundry_VTT-v14_%7C_v14-orange)
+![Foundry Version](https://img.shields.io/badge/Foundry_VTT-v13_%7C_v14-orange)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 ![System Agnostic](https://img.shields.io/badge/System-Agnostic-green)
 ![RTL Support](https://img.shields.io/badge/RTL-Supported-green)
@@ -34,7 +34,7 @@ For the initial release, the module tracks:
 
 ### System-Specific Dictionaries and Localisation
 
-Whilst the module works with any system, system-specific dictionaries can be added to convert standard dot-notation database keys (e.g., `system.health.hp.value`) into more easily readable text (e.g., `Hit Points`). If the game system provides its own localisation files, the tracker maps to those keys, making sure the  log automatically translates into any language supported by the system.
+Whilst the module works with any system, system-specific dictionaries can be added to convert standard dot-notation database keys (e.g., `system.health.hp.value`) into more easily readable text (e.g., `Hit Points`). If the game system provides its own localisation files, the tracker maps to these keys, making sure it can translate into any language supported by the system.
 
 For the initial release, a simple dictionary has been included for the Rolemaster Unified (RMU) system as an example.
 
@@ -42,7 +42,6 @@ For the initial release, a simple dictionary has been included for the Rolemaste
 
 These features are planned for future updates, in no particular order:
 
-- Expand the existing RMU dictionary.
 - Add dictionaries for other popular systems.
 - Introduce UI filters to isolate specific types of changes within a player's log.
 - Extract deeper, system-specific details from items and active effects.

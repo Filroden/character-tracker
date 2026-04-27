@@ -3,7 +3,7 @@
     "title": "Character Tracker",
     "description": "A lightweight audit tool that tracks high-level changes to player-owned characters and gives the GM a dedicated interface to review changes made by each player.",
     "version": "1.0.0",
-    "compatibility": { "minimum": "14", "verified": "14.360", "maximum": "14" },
+    "compatibility": { "minimum": "13", "verified": "14.360", "maximum": "14" },
     "authors": [{ "name": "Ken Dearman" }],
     "esmodules": ["main.js"],
     "styles": ["styles/filroden-theme.css", "styles/character-tracker.css"],

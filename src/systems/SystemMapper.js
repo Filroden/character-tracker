@@ -29,13 +29,29 @@ export class SystemMapper {
 
     /**
      * Translates a raw system key into a human-readable, localised string.
-     * @param {string} rawKey - The flat dot-notation key (e.g., "system.hp.value").
+     * Employs hierarchical fallback (e.g., checks 'a.b.c', then 'a.b', then 'a').
+     * @param {string} rawKey - The flat dot-notation key.
      * @returns {string} - The localised string, or the raw key if no dictionary entry exists.
      */
     static translate(rawKey) {
-        const mappedKey = SystemMapper.#dictionary[rawKey];
-        if (!mappedKey) return rawKey;
+        let searchKey = rawKey;
 
-        return game.i18n.localize(mappedKey);
+        while (searchKey !== "") {
+            const mappedKey = SystemMapper.#dictionary[searchKey];
+
+            if (mappedKey) {
+                return game.i18n.localize(mappedKey);
+            }
+
+            // Find the last dot to step one level up the hierarchy
+            const lastDotIndex = searchKey.lastIndexOf(".");
+
+            // If no dots remain, we have exhausted the hierarchy
+            if (lastDotIndex === -1) break;
+
+            searchKey = searchKey.substring(0, lastDotIndex);
+        }
+
+        return rawKey;
     }
 }
