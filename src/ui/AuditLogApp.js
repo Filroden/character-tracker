@@ -7,7 +7,7 @@ import { exportPlayerLogs } from "../utils/exportHelpers.js";
 import { MODULE_ID, SETTING_KEYS } from "../config/settings.js";
 import { SystemMapper } from "../systems/SystemMapper.js";
 
-const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 
 export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = {
@@ -182,11 +182,22 @@ export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /**
-     * Action handler: Wipes the entire database of all logs.
+     * Action handler: Prompts the user before globally clearing all logs.
      */
     static async #handleClearAll(event, target) {
-        await StateManager.clearLogs();
-        this.render({ force: false });
+        const confirm = await DialogV2.confirm({
+            window: {
+                title: game.i18n.localize("character-tracker.ui.clearAllTitle"),
+            },
+            content: `<p>${game.i18n.localize("character-tracker.ui.clearAllConfirm")}</p>`,
+            modal: true,
+            rejectClose: false,
+        });
+
+        if (confirm) {
+            await StateManager.clearLogs();
+            await this.render({ force: false });
+        }
     }
 
     /**

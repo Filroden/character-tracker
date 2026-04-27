@@ -11,6 +11,9 @@
     "character-tracker.ui.totalChanges": "Total Changes",
     "character-tracker.ui.lastActivity": "Last Activity",
 
+    "character-tracker.ui.clearAllTitle": "Clear All Logs",
+    "character-tracker.ui.clearAllConfirm": "Are you sure you want to permanently delete all character change logs?",
+
     "character-tracker.settings.logStore.name": "Character Tracker Log Store",
     "character-tracker.settings.logStore.hint": "Hidden database storage for character audit logs.",
 
