@@ -21,8 +21,7 @@ This is a valuable tool for GMs to review character sheet modifications, such as
 For the initial release, the module tracks:
 
 - Modifications to core system data (e.g., stats, health, experience).
-- Adding, removing, or modifying an embedded item.
-- Adding or removing active effects.
+- Adding, removing, or modifying embedded items and active effects.
 
 ## How to use the Character Tracker
 
@@ -34,8 +33,9 @@ For the initial release, the module tracks:
    - The left panel displays a list of active players (and GMs, if tracking is enabled). Click a name to jump to their specific logs.
    - The right panel displays the audit log, nested by player and then by their individual characters. A high-level statistics summary is shown first, followed by a detailed chronological log that can be expanded or collapsed.
 3. **Saving the Log**: You can export individual logs for each player by clicking the `Download` button next to their name.
-4. **Clearing the Log**: You can wipe all logs globally (via the `Delete` button at the bottom of the left panel) or clear individual player logs (via the `Delete` button next to their name).
+4. **Switching the View**: You can switch between a chronological view (ideal for showing what was changing at the same time) and a categorical view (much easier to see what is being changed) by clicking the `Toggle View Mode` button at the bottom of the left panel. The categorical view groups changes by type (items, active effects and core data changes), and then further groups the changes by the specific item, effect or data being changed.
 5. **Refresh the Tracker**: You can see new changes in the interface without closing the window by clicking the `Refresh` button at the bottom of the left panel.
+6. **Clearing the Log**: You can wipe all logs globally (via the `Delete` button at the bottom of the left panel) or clear individual player logs (via the `Delete` button next to their name).
 
 ### System-Specific Dictionaries and Localisation
 
@@ -48,5 +48,4 @@ For the initial release, a simple dictionary has been included for the Rolemaste
 These features are planned for future updates, in no particular order:
 
 - Add dictionaries for other popular systems.
-- Introduce UI filters to isolate specific types of changes within a player's log.
 - Extract deeper, system-specific details from items and active effects.

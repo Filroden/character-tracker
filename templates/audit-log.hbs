@@ -14,6 +14,15 @@
         <div class="character-tracker-global-actions">
             <button
                 type="button"
+                data-action="toggleView"
+                class="character-tracker-btn primary"
+                data-tooltip="{{localize 'character-tracker.ui.toggleView'}}"
+                data-tooltip-class="character-tracker-tooltip"
+            >
+                <i class="character-tracker-icon filter"></i>
+            </button>
+            <button
+                type="button"
                 data-action="refreshLog"
                 class="character-tracker-btn primary"
                 data-tooltip="{{localize 'character-tracker.ui.refresh'}}"
@@ -78,17 +87,117 @@
                                     <span class="accordion-count">{{this.logs.length}}</span>
                                 </summary>
 
-                                <ul class="character-tracker-log-list">
-                                    {{#each this.logs}}
-                                        <li class="character-tracker-log-entry">
-                                            <div class="log-summary">
-                                                <span class="log-time">[{{timeSince this.timestamp}}]</span>
-                                                <span class="log-action">{{this.action}}</span>
-                                            </div>
-                                            <div class="log-detail-text">{{this.detail}}</div>
-                                        </li>
-                                    {{/each}}
-                                </ul>
+                                {{#if @root.isCategorical}}
+                                    <div class="character-tracker-categorical-view">
+
+                                        {{! Core Data Bucket }}
+                                        {{#if this.categories.core.length}}
+                                            <details class="character-tracker-accordion sub-accordion">
+                                                <summary class="accordion-header">
+                                                    <span class="accordion-title">{{localize "character-tracker.ui.catCore"}}</span>
+                                                    <span class="accordion-count">{{this.categories.coreCount}}</span>
+                                                </summary>
+                                                <div class="character-tracker-entity-list">
+                                                    {{#each this.categories.core}}
+                                                        <details class="character-tracker-accordion entity-accordion">
+                                                            <summary class="accordion-header">
+                                                                <span class="accordion-title">{{this.name}}</span>
+                                                                <span class="accordion-count">{{this.logs.length}}</span>
+                                                            </summary>
+                                                            <ul class="character-tracker-log-list">
+                                                                {{#each this.logs}}
+                                                                    <li class="character-tracker-log-entry">
+                                                                        <div class="log-summary">
+                                                                            <span class="log-time">[{{timeSince this.timestamp}}]</span>
+                                                                            <span class="log-action">{{this.action}}</span>
+                                                                        </div>
+                                                                        <div class="log-detail-text">{{this.detail}}</div>
+                                                                    </li>
+                                                                {{/each}}
+                                                            </ul>
+                                                        </details>
+                                                    {{/each}}
+                                                </div>
+                                            </details>
+                                        {{/if}}
+
+                                        {{! Items & Inventory Bucket }}
+                                        {{#if this.categories.items.length}}
+                                            <details class="character-tracker-accordion sub-accordion">
+                                                <summary class="accordion-header">
+                                                    <span class="accordion-title">{{localize "character-tracker.ui.catItems"}}</span>
+                                                    <span class="accordion-count">{{this.categories.itemsCount}}</span>
+                                                </summary>
+                                                <div class="character-tracker-entity-list">
+                                                    {{#each this.categories.items}}
+                                                        <details class="character-tracker-accordion entity-accordion">
+                                                            <summary class="accordion-header">
+                                                                <span class="accordion-title">{{this.name}}</span>
+                                                                <span class="accordion-count">{{this.logs.length}}</span>
+                                                            </summary>
+                                                            <ul class="character-tracker-log-list">
+                                                                {{#each this.logs}}
+                                                                    <li class="character-tracker-log-entry">
+                                                                        <div class="log-summary">
+                                                                            <span class="log-time">[{{timeSince this.timestamp}}]</span>
+                                                                            <span class="log-action">{{this.action}}</span>
+                                                                        </div>
+                                                                        <div class="log-detail-text">{{this.detail}}</div>
+                                                                    </li>
+                                                                {{/each}}
+                                                            </ul>
+                                                        </details>
+                                                    {{/each}}
+                                                </div>
+                                            </details>
+                                        {{/if}}
+
+                                        {{! Active Effects Bucket }}
+                                        {{#if this.categories.effects.length}}
+                                            <details class="character-tracker-accordion sub-accordion">
+                                                <summary class="accordion-header">
+                                                    <span class="accordion-title">{{localize "character-tracker.ui.catEffects"}}</span>
+                                                    <span class="accordion-count">{{this.categories.effectsCount}}</span>
+                                                </summary>
+                                                <div class="character-tracker-entity-list">
+                                                    {{#each this.categories.effects}}
+                                                        <details class="character-tracker-accordion entity-accordion">
+                                                            <summary class="accordion-header">
+                                                                <span class="accordion-title">{{this.name}}</span>
+                                                                <span class="accordion-count">{{this.logs.length}}</span>
+                                                            </summary>
+                                                            <ul class="character-tracker-log-list">
+                                                                {{#each this.logs}}
+                                                                    <li class="character-tracker-log-entry">
+                                                                        <div class="log-summary">
+                                                                            <span class="log-time">[{{timeSince this.timestamp}}]</span>
+                                                                            <span class="log-action">{{this.action}}</span>
+                                                                        </div>
+                                                                        <div class="log-detail-text">{{this.detail}}</div>
+                                                                    </li>
+                                                                {{/each}}
+                                                            </ul>
+                                                        </details>
+                                                    {{/each}}
+                                                </div>
+                                            </details>
+                                        {{/if}}
+
+                                    </div>
+                                {{else}}
+                                    {{! Standard Chronological Fallback }}
+                                    <ul class="character-tracker-log-list">
+                                        {{#each this.logs}}
+                                            <li class="character-tracker-log-entry">
+                                                <div class="log-summary">
+                                                    <span class="log-time">[{{timeSince this.timestamp}}]</span>
+                                                    <span class="log-action">{{this.action}}</span>
+                                                </div>
+                                                <div class="log-detail-text">{{this.detail}}</div>
+                                            </li>
+                                        {{/each}}
+                                    </ul>
+                                {{/if}}
                             </details>
                         {{/each}}
                     </div>

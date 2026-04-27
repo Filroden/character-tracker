@@ -24,6 +24,7 @@
 .character-tracker-icon.delete   { -webkit-mask-image: url('../icons/delete.svg'); mask-image: url('../icons/delete.svg'); }
 .character-tracker-icon.download { -webkit-mask-image: url('../icons/download.svg'); mask-image: url('../icons/download.svg'); }
 .character-tracker-icon.refresh { -webkit-mask-image: url('../icons/refresh.svg'); mask-image: url('../icons/refresh.svg'); }
+.character-tracker-icon.filter { -webkit-mask-image: url('../icons/event_list.svg'); mask-image: url('../icons/event_list.svg'); }
 
 /* ===================================================================
    --- ACTOR SIDEBAR ---
@@ -214,8 +215,8 @@
 }
 
 .character-tracker-window .character-tracker-player-section {
-    margin-block-end: 1rem;
-    padding-block-end: 1rem;
+    margin-block-end: var(--filroden-space-l);
+    padding-block-end: var(--filroden-space-l);
     border-block-end: var(--filroden-border-dashed);
 }
 
@@ -434,7 +435,8 @@
 .character-tracker-window .accordion-count {
     background-color: var(--filroden-color-bg-darkest);
     color: var(--filroden-color-text-muted);
-    padding: 2px 8px;
+    padding: var(--filroden-space-xxs) var(--filroden-space-s);
+    border-radius: var(--filroden-radius-small);
     border-radius: var(--filroden-radius-large);
     font-size: var(--filroden-font-size-xs);
 }
@@ -449,4 +451,30 @@
     align-items: baseline;
     gap: var(--filroden-space-s);
     margin-block-end: var(--filroden-space-xxs);
+}
+
+/* --- CATEGORICAL NESTING --- */
+.character-tracker-window .character-tracker-categorical-view {
+    display: flex;
+    flex-direction: column;
+    gap: var(--filroden-space-s);
+    padding-inline-start: var(--filroden-space-m);
+}
+
+.character-tracker-window .sub-accordion {
+    border-inline-start: 2px solid var(--filroden-color-text-accent);
+    padding-inline-start: var(--filroden-space-s);
+}
+
+.character-tracker-window .entity-accordion {
+    margin-inline-start: var(--filroden-space-m);
+    border-inline-start: 1px dashed var(--filroden-color-border);
+    padding-inline-start: var(--filroden-space-s);
+    margin-block-start: var(--filroden-space-xs);
+}
+
+.character-tracker-window .character-tracker-entity-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--filroden-space-xs);
 }

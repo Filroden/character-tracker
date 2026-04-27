@@ -63,6 +63,7 @@ function handleItemCreation(item, options, userId) {
         actorName: item.parent.name,
         action: "Item Added",
         detail: `${itemType} ➔ ${item.name}`,
+        entityId: item.id,
         timestamp: Date.now(),
     };
 
@@ -89,6 +90,7 @@ function handleItemUpdate(item, update, options, userId) {
         actorName: item.parent.name,
         action: "Item Modified",
         detail: `${itemContext} | ${updateDetails.join(" | ")}`,
+        entityId: item.id,
         timestamp: Date.now(),
     };
 
@@ -110,6 +112,7 @@ function handleItemDeletion(item, options, userId) {
         actorName: item.parent.name,
         action: "Item Removed",
         detail: `${itemType} ➔ ${item.name}`,
+        entityId: item.id,
         timestamp: Date.now(),
     };
 
@@ -133,6 +136,7 @@ function handleEffectCreation(effect, options, userId) {
         actorName: effect.parent.name,
         action: "Active Effect Added",
         detail: effect.name,
+        entityId: effect.id,
         timestamp: Date.now(),
     };
 
@@ -155,6 +159,7 @@ function handleEffectUpdate(effect, update, options, userId) {
         actorName: effect.parent.name,
         action: "Active Effect Modified",
         detail: `Effect (${effect.name}) | ${updateDetails.join(" | ")}`,
+        entityId: effect.id,
         timestamp: Date.now(),
     };
 
@@ -174,6 +179,7 @@ function handleEffectDeletion(effect, options, userId) {
         actorName: effect.parent.name,
         action: "Active Effect Removed",
         detail: effect.name,
+        entityId: effect.id,
         timestamp: Date.now(),
     };
 
