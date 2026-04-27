@@ -183,14 +183,16 @@ function handleActorUpdate(actor, update, options, userId) {
 function extractUpdateDetails(update) {
     const details = [];
 
+    // 1. Explicit top-level checks
     if (update.name) details.push(`Name ➔ ${update.name}`);
     if (update.prototypeToken) details.push("Token Settings Modified");
 
-    if (update.system) {
-        const flatSystem = foundry.utils.flattenObject(update.system);
+    // 2. Flatten the entire payload to safely catch BOTH nested and flat data structures
+    const flatUpdate = foundry.utils.flattenObject(update);
 
-        for (const [key, value] of Object.entries(flatSystem)) {
-            details.push(`system.${key} ➔ ${formatDisplayValue(value)}`);
+    for (const [key, value] of Object.entries(flatUpdate)) {
+        if (key.startsWith("system.")) {
+            details.push(`${key} ➔ ${formatDisplayValue(value)}`);
         }
     }
 
