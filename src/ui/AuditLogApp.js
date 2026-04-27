@@ -7,9 +7,11 @@ import { exportPlayerLogs } from "../utils/exportHelpers.js";
 import { MODULE_ID, SETTING_KEYS } from "../config/settings.js";
 import { SystemMapper } from "../systems/SystemMapper.js";
 
-const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 
 export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
+    #viewMode = "chronological"; // Tracks the active UI state
+
     static DEFAULT_OPTIONS = {
         id: "character-tracker-app",
         classes: ["character-tracker-window"],
@@ -29,6 +31,7 @@ export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
             exportPlayer: AuditLogApp.#handleExportPlayer,
             scrollToPlayer: AuditLogApp.#handleScrollToPlayer,
             refreshLog: AuditLogApp.#handleRefreshLog,
+            toggleView: AuditLogApp.#handleToggleView,
         },
     };
 
@@ -43,7 +46,12 @@ export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
      */
     async _prepareContext(options) {
         const context = await super._prepareContext(options);
-        context.players = this.#buildPlayerContext();
+
+        // Destructure the newly returned object from the formatting loop
+        const viewData = this.#buildPlayerContext();
+        context.players = viewData.players;
+        context.isCategorical = viewData.isCategorical;
+
         return context;
     }
 
@@ -176,17 +184,104 @@ export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
         contextArray.forEach((player) => {
             player.characters = Array.from(player.charactersMap.values());
             delete player.charactersMap;
+
+            // Apply categorical grouping if the view mode is active
+            if (this.#viewMode === "categorical") {
+                player.characters.forEach((char) => {
+                    char.categories = this.#buildCategoricalView(char.logs);
+                });
+            }
         });
 
-        return contextArray;
+        return {
+            players: contextArray,
+            isCategorical: this.#viewMode === "categorical",
+        };
     }
 
     /**
-     * Action handler: Wipes the entire database of all logs.
+     * Sorts a flat array of character logs into categorical buckets and groups by entity.
+     * @param {Array<object>} logs - The chronological log array.
+     * @returns {object} - The grouped categorical structure including action counts.
+     */
+    #buildCategoricalView(logs) {
+        const buckets = { core: new Map(), items: new Map(), effects: new Map() };
+        const counts = { core: 0, items: 0, effects: 0 };
+
+        logs.forEach((log) => {
+            let entityName = "Unknown";
+            let targetMap = null;
+            let targetCountKey = null;
+
+            if (log.action === "Data Modified") {
+                targetMap = buckets.core;
+                targetCountKey = "core";
+                entityName = log.detail.split(" ➔ ")[0];
+            } else if (log.action.includes("Item")) {
+                targetMap = buckets.items;
+                targetCountKey = "items";
+
+                if (log.action === "Item Modified") {
+                    entityName = log.detail.split(" | ")[0];
+                } else {
+                    const parts = log.detail.split(" ➔ ");
+                    entityName = parts.length === 2 ? `${parts[0]} (${parts[1]})` : log.detail;
+                }
+            } else if (log.action.includes("Effect")) {
+                targetMap = buckets.effects;
+                targetCountKey = "effects";
+
+                if (log.action === "Active Effect Modified") {
+                    entityName = log.detail.split(" | ")[0];
+                } else {
+                    entityName = `Effect (${log.detail})`;
+                }
+            }
+
+            if (!targetMap) return;
+
+            // Increment the total action count for this specific category
+            counts[targetCountKey]++;
+
+            // FALLBACK LOGIC: Use the saved ID to prevent identical name collisions.
+            // If it is a v1.0.0 legacy log (or core data), fallback to the string name.
+            const groupKey = log.entityId || entityName;
+
+            // Group the log under the highly specific unique key
+            if (!targetMap.has(groupKey)) {
+                targetMap.set(groupKey, { name: entityName, logs: [] });
+            }
+            targetMap.get(groupKey).logs.push(log);
+        });
+
+        // Return flat, alphabetically sorted arrays and their respective total action counts
+        return {
+            core: Array.from(buckets.core.values()).sort((a, b) => a.name.localeCompare(b.name)),
+            coreCount: counts.core,
+            items: Array.from(buckets.items.values()).sort((a, b) => a.name.localeCompare(b.name)),
+            itemsCount: counts.items,
+            effects: Array.from(buckets.effects.values()).sort((a, b) => a.name.localeCompare(b.name)),
+            effectsCount: counts.effects,
+        };
+    }
+
+    /**
+     * Action handler: Prompts the user before globally clearing all logs.
      */
     static async #handleClearAll(event, target) {
-        await StateManager.clearLogs();
-        this.render({ force: false });
+        const confirm = await DialogV2.confirm({
+            window: {
+                title: game.i18n.localize("character-tracker.ui.clearAllTitle"),
+            },
+            content: `<p>${game.i18n.localize("character-tracker.ui.clearAllConfirm")}</p>`,
+            modal: true,
+            rejectClose: false,
+        });
+
+        if (confirm) {
+            await StateManager.clearLogs();
+            await this.render({ force: false });
+        }
     }
 
     /**
@@ -231,6 +326,14 @@ export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
      * Action handler: Manually recalculates state and refreshes the application UI.
      */
     static async #handleRefreshLog(event, target) {
+        await this.render({ force: false });
+    }
+
+    /**
+     * Action handler: Toggles between chronological and categorical views.
+     */
+    static async #handleToggleView(event, target) {
+        this.#viewMode = this.#viewMode === "chronological" ? "categorical" : "chronological";
         await this.render({ force: false });
     }
 }

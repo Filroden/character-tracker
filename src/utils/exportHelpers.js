@@ -46,7 +46,7 @@ function formatLogsForExport(logs, playerName) {
 }
 
 /**
- * Generates a safe file name based on the player's name.
+ * Generates a safe file name based on the player's name and the current date.
  * @param {string} playerName - The name of the player.
  * @returns {string} - The formatted file name.
  */
@@ -56,5 +56,12 @@ function generateFileName(playerName) {
         .toLowerCase()
         .replaceAll(/[^a-z0-9]/g, "-")
         .replaceAll(/-+/g, "-");
-    return `${EXPORT_CONFIG.PREFIX}-${safeName}${EXPORT_CONFIG.EXTENSION}`;
+
+    // Generate a formatted timestamp (e.g., 2026-04-27_12-30)
+    const now = new Date();
+    const pad = (n) => n.toString().padStart(2, "0");
+    const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const timeStr = `${pad(now.getHours())}-${pad(now.getMinutes())}`;
+
+    return `${EXPORT_CONFIG.PREFIX}-${safeName}-${dateStr}_${timeStr}${EXPORT_CONFIG.EXTENSION}`;
 }

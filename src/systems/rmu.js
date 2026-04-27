@@ -27,7 +27,7 @@ export const rmuDictionary = {
     "system.appearance.hair": "RMU.Terms.HairColon",
     "system.appearance.eyes": "RMU.Terms.EyesColon",
     "system.appearance.voice": "RMU.Terms.VoiceColon",
-    "system.appearance.conbatZoneFactor": "RMU.Terms.CombatZoneScaleFactor",
+    "system.appearance.combatZoneFactor": "RMU.Terms.CombatZoneScaleFactor",
 
     // Identity
     "system.identity.gender": "RMU.Terms.GenderColon",
