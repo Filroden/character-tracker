@@ -16,6 +16,8 @@ This module provides a system-agnostic tracker for any changes made by players t
 
 This is a valuable tool for GMs to review character sheet modifications, such as during levelling up, particularly if you leave your game server accessible between live sessions.
 
+![Character Tracker](https://github.com/Filroden/character-tracker/blob/main/screenshots/character-tracker.png)
+
 For the initial release, the module tracks:
 
 - Modifications to core system data (e.g., stats, health, experience).
@@ -25,6 +27,9 @@ For the initial release, the module tracks:
 ## How to use the Character Tracker
 
 1. **Open the Character Tracker window**: A new icon is available at the top of the `Actors` sidebar to open the interface.
+
+   ![Character Tracker View Button](https://github.com/Filroden/character-tracker/blob/main/screenshots/character-tracker-view-button.png)
+
 2. **Navigation**:
    - The left panel displays a list of active players (and GMs, if tracking is enabled). Click a name to jump to their specific logs.
    - The right panel displays the audit log, nested by player and then by their individual characters. A high-level statistics summary is shown first, followed by a detailed chronological log that can be expanded or collapsed.
