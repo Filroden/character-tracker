@@ -1,0 +1,452 @@
+/* ===================================================================
+   --- MATERIAL DESIGN ICONS ---
+=================================================================== */
+.character-tracker-icon {
+    display: inline-block;
+    width: var(--filroden-font-size-l); 
+    height: var(--filroden-font-size-l);
+    min-width: var(--filroden-font-size-l);
+    background-color: currentColor;
+    background-image: none !important;
+    content: "";
+    transform: scaleX(var(--filroden-dir-flip));
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    margin: 0;
+}
+
+.character-tracker-icon.list     { -webkit-mask-image: url('../icons/fact_check.svg'); mask-image: url('../icons/fact_check.svg'); }
+.character-tracker-icon.person   { -webkit-mask-image: url('../icons/person.svg'); mask-image: url('../icons/person.svg'); }
+.character-tracker-icon.delete   { -webkit-mask-image: url('../icons/delete.svg'); mask-image: url('../icons/delete.svg'); }
+.character-tracker-icon.download { -webkit-mask-image: url('../icons/download.svg'); mask-image: url('../icons/download.svg'); }
+.character-tracker-icon.refresh { -webkit-mask-image: url('../icons/refresh.svg'); mask-image: url('../icons/refresh.svg'); }
+
+/* ===================================================================
+   --- ACTOR SIDEBAR ---
+=================================================================== */
+
+.character-tracker-sidebar-btn {
+    flex: 0.25;
+}
+
+/* ===================================================================
+   --- APPLICATION SCROLLBARS ---
+=================================================================== */
+
+.character-tracker-window * {
+    scrollbar-width: auto !important;
+    scrollbar-color: auto !important;
+}
+
+.character-tracker-window .character-tracker-window-scrollable::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+}
+
+.character-tracker-window .character-tracker-window-scrollable::-webkit-scrollbar-track {
+    background: var(--filroden-color-bg-hover-solid) !important;
+    border-radius: var(--filroden-radius-large) !important;
+}
+
+.character-tracker-window .character-tracker-window-scrollable::-webkit-scrollbar-thumb {
+    background-color: var(--filroden-color-text-accent) !important;
+    border-radius: var(--filroden-radius-large) !important;
+    border: 1px solid rgba(0, 0, 0, 0.6) !important;
+}
+
+.character-tracker-window .character-tracker-window-scrollable::-webkit-scrollbar-thumb:hover {
+    background-color: var(--filroden-color-text-accent-hover) !important;
+}
+
+.character-tracker-window .character-tracker-window-scrollable::-webkit-scrollbar-button {
+    display: none;
+}
+
+/* ===================================================================
+   --- TOOLTIPS ---
+=================================================================== */
+
+#tooltip.character-tracker-tooltip {
+    max-width: 300px !important;
+    border: 1px solid var(--filroden-color-text-accent);
+    border-radius: var(--filroden-radius-small);
+    padding: var(--filroden-space-s);
+    background: var(--filroden-color-bg-darkest);
+    color: var(--filroden-color-text-main-solid);
+    box-shadow: var(--filroden-shadow-popout);
+    font-family: var(--filroden-font-family);
+    font-size: var(--filroden-font-size-s);
+    line-height: 1.4;
+    text-align: start;
+    z-index: var(--z-index-tooltip, 9999);
+    margin-top: var(--filroden-space-m);
+}
+
+/* ===================================================================
+   --- APPLICATION LAYOUT ---
+=================================================================== */
+
+.character-tracker-window {
+    font-family: var(--filroden-font-family) !important;
+    font-size: var(--filroden-font-size-s);
+    --filroden-dir-flip: 1;
+}
+
+.character-tracker-window.rtl {
+    --filroden-dir-flip: -1;
+}
+
+.character-tracker-window .window-header {
+    background: var(--filroden-color-bg-darkest) !important;
+    border: none !important;
+    color: var(--filroden-color-text-main-solid);
+    flex: 0 0 auto !important; 
+    min-height: 34px; 
+    height: auto !important;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.character-tracker-window .window-header .window-title {
+    font-size: var(--filroden-font-size-s);
+    line-height: 1.2;
+    text-align: start; 
+    padding-inline-start: var(--filroden-space-s);
+    padding-inline-end: 0;
+    flex: 1;
+}
+
+.character-tracker-window .window-header .window-icon {
+    margin-inline-start: var(--filroden-space-xxs);
+    margin-inline-end: 0;
+}
+
+.character-tracker-window .window-content {
+    padding: 0;
+    overflow: hidden;
+    background-color: var(--filroden-color-bg-darkest);
+    color: var(--filroden-color-text-main);
+    font-family: var(--filroden-font-family);
+}
+
+.character-tracker-window .character-tracker-layout {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+/* --- SIDEBAR --- */
+.character-tracker-window .character-tracker-sidebar {
+    width: 12.5rem; /* ~200px */
+    display: flex;
+    flex-direction: column;
+    padding: var(--filroden-space-m);
+    gap: var(--filroden-space-m);
+    background-color: var(--filroden-color-bg-darkest);
+    border-inline-end: 1px solid var(--filroden-color-border);
+}
+
+.character-tracker-window .character-tracker-sidebar-header {
+    border-bottom: 2px solid var(--filroden-color-text-accent);
+    font-family: var(--font-primary);
+    font-size: var(--filroden-font-size-m);
+    font-weight: var(--filroden-font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--filroden-color-text-main-solid);
+    margin-block-end: var(--filroden-space-s);
+    padding-block-end: var(--filroden-space-xs);
+    line-height: 1;
+}
+
+.character-tracker-window .character-tracker-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--filroden-space-m);
+    display: flex;
+    flex-direction: column;
+    gap: var(--filroden-space-xs);
+}
+
+.character-tracker-window .character-tracker-nav-link {
+    display: flex;
+    align-items: center;
+    gap: var(--filroden-space-s);
+    color: var(--filroden-color-text-main);
+    text-decoration: none;
+    border-radius: var(--filroden-radius-small);
+    transition: background-color 0.2s ease;
+    width: 100%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    text-align: start;
+    justify-content: start;
+}
+
+.character-tracker-window .character-tracker-nav-link:hover {
+    background-color: var(--filroden-color-bg-hover);
+    color: var(--filroden-color-text-accent-hover);
+    text-shadow: var(--filroden-shadow-text);
+}
+
+.character-tracker-window .character-tracker-global-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--filroden-space-s);
+    padding-block-start: var(--filroden-space-l);
+    border-block-start: 1px solid var(--filroden-color-text-accent);
+}
+
+/* --- MAIN CONTENT --- */
+.character-tracker-window .character-tracker-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--filroden-space-l);
+    scroll-behavior: smooth;
+}
+
+.character-tracker-window .character-tracker-player-section {
+    margin-block-end: 1rem;
+    padding-block-end: 1rem;
+    border-block-end: var(--filroden-border-dashed);
+}
+
+.character-tracker-window .character-tracker-player-section:last-child {
+    border-block-end: none;
+    margin-block-end: 0;
+}
+
+.character-tracker-window .character-tracker-player-header {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: var(--filroden-color-bg-darkest);
+    padding: var(--filroden-space-xs) 0;
+    margin: 0 0 var(--filroden-space-s) 0;
+    border-radius: var(--filroden-radius-small);
+    border-bottom: 2px solid var(--filroden-color-text-accent);
+    color: var(--filroden-color-text-accent);
+    font-size: var(--filroden-font-size-s);
+    font-weight: var(--filroden-font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 3rem;
+    gap: var(--filroden-space-s);
+    box-shadow: var(--filroden-shadow-popout);
+}
+
+.character-tracker-window .character-tracker-player-title {
+    margin: 0;
+    font-size: var(--filroden-font-size-s);
+    font-weight: var(--filroden-font-weight-bold);
+    color: var(--filroden-color-text-accent);
+    display: flex;
+    align-items: center;
+    gap: var(--filroden-space-s);
+}
+
+.character-tracker-window .character-tracker-player-actions {
+    display: flex;
+    gap: var(--filroden-space-s);
+}
+
+/* --- LOG ENTRIES --- */
+.character-tracker-window .character-tracker-log-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--filroden-space-s);
+}
+
+.character-tracker-window .character-tracker-log-entry {
+    background-color: var(--filroden-color-bg-light);
+    border-radius: var(--filroden-radius-medium);
+    padding: var(--filroden-space-s) var(--filroden-space-m);
+    box-shadow: var(--filroden-shadow-card);
+    border: var(--filroden-border-dark);
+}
+
+.character-tracker-window .log {
+    display: flex;
+    align-items: baseline;
+    gap: var(--filroden-space-s);
+    margin-block-end: var(--filroden-space-xxs);
+    font-size: var(--filroden-font-size-s);
+}
+
+.character-tracker-window .log-time {
+    color: var(--filroden-color-text-muted);
+    font-size: var(--filroden-font-size-xs);
+}
+
+.character-tracker-window .log-actor {
+    font-weight: var(--filroden-font-weight-bold);
+    color: var(--filroden-color-text-muted);
+}
+
+.character-tracker-window .log-action {
+    font-weight: var(--filroden-font-weight-bold);
+    color: var(--filroden-color-text-accent);
+    text-transform: uppercase;
+}
+
+.character-tracker-window .log-detail-text {
+    color: var(--filroden-color-text-main-solid);
+}
+
+.character-tracker-window .character-tracker-empty {
+    text-align: center;
+    color: var(--filroden-color-text-placeholder);
+    font-style: italic;
+    padding: var(--filroden-space-l);
+    background-color: var(--filroden-color-bg-light);
+    border-radius: var(--filroden-radius-medium);
+}
+
+/* --- BUTTON STYLES --- */
+.character-tracker-window button {
+    background: var(--filroden-color-bg-light-solid);
+    border: 1px solid var(--filroden-color-border);
+    color: var(--filroden-color-text-main-solid);
+    border-radius: var(--filroden-radius-small);
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.1s ease;
+}
+
+.character-tracker-window button:hover {
+    background: var(--filroden-color-bg-hover-solid);
+    border-color: var(--filroden-color-text-accent);
+    box-shadow: none;
+}
+
+.character-tracker-window *:focus-visible,
+.character-tracker-window button:focus {
+    outline: 2px solid var(--filroden-color-text-accent);
+    border-radius: var(--filroden-radius-small);
+}
+
+.character-tracker-window .character-tracker-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    font-size: var(--filroden-font-size-s);
+    font-weight: var(--filroden-font-weight-bold);
+    gap: var(--filroden-space-s);
+    padding: var(--filroden-space-s) var(--filroden-space-m);
+}
+
+.character-tracker-window .character-tracker-btn:hover {
+    background: var(--filroden-color-bg-hover-solid);
+    border-color: var(--filroden-color-text-accent);
+    color: var(--filroden-color-text-main-solid);
+}
+
+.character-tracker-window .character-tracker-btn.danger {
+    color: var(--filroden-color-danger);
+    width: 100%;
+}
+
+.character-tracker-window .character-tracker-btn.danger:hover {
+    color: var(--filroden-color-danger);
+}
+
+.character-tracker-window .character-tracker-btn.primary {
+    color: var(--filroden-color-text-accent);
+}
+
+.character-tracker-window .character-tracker-btn.primary:hover {
+    color: var(--filroden-color-text-accent);
+}
+
+/* --- STATISTICS BAR --- */
+.character-tracker-window .character-tracker-stats-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--filroden-space-m);
+    background-color: var(--filroden-color-bg-light);
+    border-radius: var(--filroden-radius-small);
+    padding: var(--filroden-space-s) var(--filroden-space-m);
+    margin-block-end: var(--filroden-space-m);
+    font-size: var(--filroden-font-size-xs);
+    border: 1px solid var(--filroden-color-border);
+}
+
+.character-tracker-window .stat-badge {
+    color: var(--filroden-color-text-main);
+}
+
+/* --- ACCORDION --- */
+.character-tracker-window .character-tracker-characters {
+    display: flex;
+    flex-direction: column;
+    gap: var(--filroden-space-m);
+}
+
+.character-tracker-window .character-tracker-accordion {
+    background: transparent;
+}
+
+.character-tracker-window .accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--filroden-color-bg-hover);
+    padding: var(--filroden-space-s) var(--filroden-space-m);
+    border-radius: var(--filroden-radius-small);
+    cursor: pointer;
+    font-weight: var(--filroden-font-weight-bold);
+    color: var(--filroden-color-text-accent);
+    margin-block-end: var(--filroden-space-s);
+    user-select: none;
+    transition: background-color 0.2s ease;
+    list-style: none; /* Removes native browser arrows */
+}
+
+.character-tracker-window .accordion-header::-webkit-details-marker {
+    display: none; /* Removes native Safari/Chrome arrows */
+}
+
+.character-tracker-window .accordion-header:hover {
+    background-color: var(--filroden-color-bg-hover-solid);
+}
+
+.character-tracker-window .accordion-title {
+    display: flex;
+    align-items: center;
+    gap: var(--filroden-space-s);
+}
+
+.character-tracker-window .accordion-count {
+    background-color: var(--filroden-color-bg-darkest);
+    color: var(--filroden-color-text-muted);
+    padding: 2px 8px;
+    border-radius: var(--filroden-radius-large);
+    font-size: var(--filroden-font-size-xs);
+}
+
+/* Updates the layout of log items nested within the accordion */
+.character-tracker-window .character-tracker-accordion .character-tracker-log-list {
+    padding-inline-start: var(--filroden-space-m);
+}
+
+.character-tracker-window .character-tracker-accordion .log-summary {
+    display: flex;
+    align-items: baseline;
+    gap: var(--filroden-space-s);
+    margin-block-end: var(--filroden-space-xxs);
+}

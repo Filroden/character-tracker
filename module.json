@@ -1,23 +1,20 @@
 {
-  "id": "MODULE-FOUNDRY-ID",
-  "title": "Mona Lisa",
-  "description": "My greatest work",
-  "version": "0.0.0",
-  "compatibility": {
-    "minimum": "13",
-    "verified": "13"
-  },
-  "authors": [
-    {
-      "name": "Ken Dearman"
-    }
-  ],
-  "esmodules": [
-    "main.js"
-  ],
-  "styles": [
-  ],
-  "manifestPlusVersion": 1,
-  "manifest": "https://github.com/Filroden/fvtt/releases/download/MODULE-FOUNDRY-ID-latest/module.json",
-  "download": " https://github.com/Filroden/fvtt/releases/download/MODULE-FOUNDRY-ID-latest/MODULE-FOUNDRY-ID.zip"
+    "id": "character-tracker",
+    "title": "Character Tracker",
+    "description": "A lightweight audit tool that tracks high-level changes to player-owned characters and gives the GM a dedicated interface to review changes made by each player.",
+    "version": "1.0.0",
+    "compatibility": { "minimum": "13", "verified": "14.360", "maximum": "14" },
+    "authors": [{ "name": "Ken Dearman" }],
+    "esmodules": ["main.js"],
+    "styles": ["styles/filroden-theme.css", "styles/character-tracker.css"],
+    "languages": [
+        { "lang": "en", "name": "English", "path": "languages/en.json" },
+        { "lang": "en-GB", "name": "English (UK)", "path": "languages/en-gb.json" }
+    ],
+    "url": "https://github.com/Filroden/character-tracker",
+    "manifest": "https://github.com/Filroden/character-tracker/releases/latest/download/module.json",
+    "download": "https://github.com/Filroden/character-tracker/releases/download/v1.0.0/character-tracker.zip",
+    "bugs": "https://github.com/Filroden/character-tracker/issues",
+    "readme": "https://github.com/Filroden/character-tracker/blob/main/README.md",
+    "license": "https://mit-license.org/"
 }
