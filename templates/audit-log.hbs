@@ -59,10 +59,18 @@
                             data-user-id="{{this.id}}"
                             class="character-tracker-btn primary"
                             data-tooltip="{{localize 'character-tracker.ui.exportTooltip'}}"
+                            data-tooltip-class="character-tracker-tooltip"
                         >
                             <i class="character-tracker-icon download"></i>
                         </button>
-                        <button type="button" data-action="clearPlayer" data-user-id="{{this.id}}" class="character-tracker-btn danger" data-tooltip="{{localize 'character-tracker.ui.clearTooltip'}}">
+                        <button
+                            type="button"
+                            data-action="clearPlayer"
+                            data-user-id="{{this.id}}"
+                            class="character-tracker-btn danger"
+                            data-tooltip="{{localize 'character-tracker.ui.clearTooltip'}}"
+                            data-tooltip-class="character-tracker-tooltip"
+                        >
                             <i class="character-tracker-icon delete"></i>
                         </button>
                     </div>
