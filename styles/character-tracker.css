@@ -468,7 +468,7 @@
 
 .character-tracker-window .entity-accordion {
     margin-inline-start: var(--filroden-space-m);
-    border-inline-start: 1px dashed var(--filroden-color-border);
+    border-inline-start: 2px dashed var(--filroden-color-border);
     padding-inline-start: var(--filroden-space-s);
     margin-block-start: var(--filroden-space-xs);
 }
