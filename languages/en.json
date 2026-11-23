@@ -14,6 +14,8 @@
     "character-tracker.ui.catCore": "Core Data Modifications",
     "character-tracker.ui.catItems": "Items",
     "character-tracker.ui.catEffects": "Active Effects",
+    "character-tracker.ui.recordedWithoutGM": "No GM",
+    "character-tracker.ui.recordedWithoutGMTooltip": "Recorded by the player's own client while no GM was online.",
 
     "character-tracker.ui.clearAllTitle": "Clear All Logs",
     "character-tracker.ui.clearAllConfirm": "Are you sure you want to permanently delete all character change logs?",
@@ -22,5 +24,8 @@
     "character-tracker.settings.logStore.hint": "Hidden database storage for character audit logs.",
 
     "character-tracker.settings.trackGM.name": "Track GM Changes",
-    "character-tracker.settings.trackGM.hint": "If enabled, the tracker will also record modifications made by GMs to player-owned characters."
+    "character-tracker.settings.trackGM.hint": "If enabled, the tracker will also record modifications made by GMs to player-owned characters.",
+
+    "character-tracker.settings.recordWithoutGM.name": "Record Changes When No GM Is Online",
+    "character-tracker.settings.recordWithoutGM.hint": "If enabled, changes players make while no GM is logged in are saved on the character by the player's own client, then added to the log the next time a GM logs in. Because these entries are stored on a character the player owns, a determined player could edit them before a GM logs in, so they are marked in the log."
 }

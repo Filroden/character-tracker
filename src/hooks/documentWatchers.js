@@ -3,6 +3,7 @@
  */
 
 import { StateManager } from "../data/StateManager.js";
+import { PendingLogQueue, isInternalUpdate } from "../data/PendingLogQueue.js";
 import { MODULE_ID, SETTING_KEYS } from "../config/settings.js";
 import { SystemMapper } from "../systems/SystemMapper.js";
 import { CHANGE_KEYS, CHANGE_SEPARATOR, formatChange } from "../utils/logFormatting.js";
@@ -30,27 +31,64 @@ export function registerDocumentWatchers() {
 }
 
 /**
- * Validates if the current client should process this event based on user permissions.
- * @param {string} actionAuthorId - The ID of the user who triggered the event.
- * @returns {boolean} - True if this client should process the log.
+ * How (and whether) this client should record a given change.
+ * DIRECT: this client is the active GM and writes straight to the main log.
+ * QUEUED: no GM is connected, so this client (the author's own) queues the entry on the actor.
+ * NONE: another client is responsible, or the change should not be recorded.
  */
-function shouldProcessLog(actionAuthorId) {
-    // 1. THE BROWSER GUARD: Only the GM's browser should process logs to prevent duplicates
-    const currentBrowserUserId = game.user.id;
-    if (game.users.activeGM?.id !== currentBrowserUserId) return false;
+const RECORDING_MODE = Object.freeze({
+    NONE: "none",
+    DIRECT: "direct",
+    QUEUED: "queued",
+});
 
-    // 2. THE AUTHOR GUARD: Check who actually made the change
+/**
+ * Decides how the current client should handle an event, based on who made the change and
+ * which clients are connected. Exactly one client records each change, which prevents duplicates:
+ * the active GM if one is connected, otherwise the author's own client.
+ * @param {string} actionAuthorId - The ID of the user who triggered the event.
+ * @returns {string} - One of the RECORDING_MODE values.
+ */
+function getRecordingMode(actionAuthorId) {
+    // 1. THE AUTHOR GUARD: Check who actually made the change
     const actionAuthor = game.users.get(actionAuthorId);
-    if (!actionAuthor) return false;
+    if (!actionAuthor) return RECORDING_MODE.NONE;
 
     // If the person who made the change is a GM, check the module settings
-    if (actionAuthor.isGM) {
-        const trackGMs = game.settings.get(MODULE_ID, SETTING_KEYS.TRACK_GM);
-        if (!trackGMs) return false; // Ignore the GM's action if the setting is off
-    }
+    if (actionAuthor.isGM && !game.settings.get(MODULE_ID, SETTING_KEYS.TRACK_GM)) return RECORDING_MODE.NONE;
 
-    // If we reach this point, it was either a Player action, or a GM action with tracking enabled
-    return true;
+    // 2. THE BROWSER GUARD: While a GM is connected, only the active GM's browser records
+    const activeGM = game.users.activeGM;
+    if (activeGM) return activeGM.isSelf ? RECORDING_MODE.DIRECT : RECORDING_MODE.NONE;
+
+    // 3. NO GM CONNECTED: Only the author's own browser may queue the change, and only if enabled
+    return canQueueWithoutGM(actionAuthorId) ? RECORDING_MODE.QUEUED : RECORDING_MODE.NONE;
+}
+
+/**
+ * Checks whether this client should queue a change made while no GM is connected.
+ * Only the author's client queues, because every connected client receives the same hook and
+ * the author's client is the only one guaranteed to be connected and to own the actor.
+ * @param {string} actionAuthorId - The ID of the user who triggered the event.
+ * @returns {boolean} - True if this client should queue the entry.
+ */
+function canQueueWithoutGM(actionAuthorId) {
+    if (actionAuthorId !== game.user.id) return false;
+    return game.settings.get(MODULE_ID, SETTING_KEYS.RECORD_WITHOUT_GM);
+}
+
+/**
+ * Sends a finished log entry to the right store for the recording mode.
+ * @param {string} mode - The RECORDING_MODE returned by getRecordingMode.
+ * @param {Actor} actor - The world actor the change belongs to.
+ * @param {object} logEntry - The formatted log data object.
+ */
+function recordLog(mode, actor, logEntry) {
+    if (mode === RECORDING_MODE.DIRECT) {
+        StateManager.addLog(logEntry);
+        return;
+    }
+    if (mode === RECORDING_MODE.QUEUED) PendingLogQueue.queue(actor, logEntry);
 }
 
 /* ===================================================================
@@ -144,7 +182,8 @@ function getTrackedKeys(update) {
  * Handles the creation of an embedded Item.
  */
 function handleItemCreation(item, options, userId) {
-    if (!shouldProcessLog(userId)) return;
+    const mode = getRecordingMode(userId);
+    if (mode === RECORDING_MODE.NONE) return;
     if (item.parent?.documentName !== "Actor") return;
     if (item.parent.isToken) return;
 
@@ -159,14 +198,15 @@ function handleItemCreation(item, options, userId) {
         timestamp: Date.now(),
     };
 
-    StateManager.addLog(logEntry);
+    recordLog(mode, item.parent, logEntry);
 }
 
 /**
  * Handles the modification of an existing embedded Item.
  */
 function handleItemUpdate(item, update, options, userId) {
-    if (!shouldProcessLog(userId)) return;
+    const mode = getRecordingMode(userId);
+    if (mode === RECORDING_MODE.NONE) return;
     if (item.parent?.documentName !== "Actor") return;
     if (item.parent.isToken) return;
 
@@ -187,14 +227,15 @@ function handleItemUpdate(item, update, options, userId) {
         timestamp: Date.now(),
     };
 
-    StateManager.addLog(logEntry);
+    recordLog(mode, item.parent, logEntry);
 }
 
 /**
  * Handles the deletion of an embedded Item.
  */
 function handleItemDeletion(item, options, userId) {
-    if (!shouldProcessLog(userId)) return;
+    const mode = getRecordingMode(userId);
+    if (mode === RECORDING_MODE.NONE) return;
     if (item.parent?.documentName !== "Actor") return;
     if (item.parent.isToken) return;
 
@@ -209,7 +250,7 @@ function handleItemDeletion(item, options, userId) {
         timestamp: Date.now(),
     };
 
-    StateManager.addLog(logEntry);
+    recordLog(mode, item.parent, logEntry);
 }
 
 /* ===================================================================
@@ -220,7 +261,8 @@ function handleItemDeletion(item, options, userId) {
  * Handles the creation of an embedded Active Effect.
  */
 function handleEffectCreation(effect, options, userId) {
-    if (!shouldProcessLog(userId)) return;
+    const mode = getRecordingMode(userId);
+    if (mode === RECORDING_MODE.NONE) return;
     if (effect.parent?.documentName !== "Actor") return;
     if (effect.parent.isToken) return;
 
@@ -233,14 +275,15 @@ function handleEffectCreation(effect, options, userId) {
         timestamp: Date.now(),
     };
 
-    StateManager.addLog(logEntry);
+    recordLog(mode, effect.parent, logEntry);
 }
 
 /**
  * Handles the modification or toggling of an existing Active Effect.
  */
 function handleEffectUpdate(effect, update, options, userId) {
-    if (!shouldProcessLog(userId)) return;
+    const mode = getRecordingMode(userId);
+    if (mode === RECORDING_MODE.NONE) return;
     if (effect.parent?.documentName !== "Actor") return;
     if (effect.parent.isToken) return;
 
@@ -257,14 +300,15 @@ function handleEffectUpdate(effect, update, options, userId) {
         timestamp: Date.now(),
     };
 
-    StateManager.addLog(logEntry);
+    recordLog(mode, effect.parent, logEntry);
 }
 
 /**
  * Handles the deletion of an embedded Active Effect.
  */
 function handleEffectDeletion(effect, options, userId) {
-    if (!shouldProcessLog(userId)) return;
+    const mode = getRecordingMode(userId);
+    if (mode === RECORDING_MODE.NONE) return;
     if (effect.parent?.documentName !== "Actor") return;
     if (effect.parent.isToken) return;
 
@@ -277,7 +321,7 @@ function handleEffectDeletion(effect, options, userId) {
         timestamp: Date.now(),
     };
 
-    StateManager.addLog(logEntry);
+    recordLog(mode, effect.parent, logEntry);
 }
 
 /* ===================================================================
@@ -288,7 +332,11 @@ function handleEffectDeletion(effect, options, userId) {
  * Handles modifications to the Actor document.
  */
 function handleActorUpdate(actor, update, options, userId) {
-    if (!shouldProcessLog(userId)) return;
+    // The module's own flag writes (queued entries) are bookkeeping, not player changes
+    if (isInternalUpdate(options)) return;
+
+    const mode = getRecordingMode(userId);
+    if (mode === RECORDING_MODE.NONE) return;
     if (actor.isToken) return;
     if (!actor.hasPlayerOwner) return;
 
@@ -304,7 +352,7 @@ function handleActorUpdate(actor, update, options, userId) {
         timestamp: Date.now(),
     };
 
-    StateManager.addLog(logEntry);
+    recordLog(mode, actor, logEntry);
 }
 
 /**

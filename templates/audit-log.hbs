@@ -118,6 +118,9 @@
                                                                         <div class="log-summary">
                                                                             <span class="log-time">[{{timeSince this.timestamp}}]</span>
                                                                             <span class="log-action">{{this.action}}</span>
+                                                                            {{#if this.recordedWithoutGM}}
+                                                                                <span class="log-offline-badge" data-tooltip="{{localize 'character-tracker.ui.recordedWithoutGMTooltip'}}" data-tooltip-class="character-tracker-tooltip">{{localize "character-tracker.ui.recordedWithoutGM"}}</span>
+                                                                            {{/if}}
                                                                         </div>
                                                                         <div class="log-detail-text">{{this.detail}}</div>
                                                                     </li>
@@ -149,6 +152,9 @@
                                                                         <div class="log-summary">
                                                                             <span class="log-time">[{{timeSince this.timestamp}}]</span>
                                                                             <span class="log-action">{{this.action}}</span>
+                                                                            {{#if this.recordedWithoutGM}}
+                                                                                <span class="log-offline-badge" data-tooltip="{{localize 'character-tracker.ui.recordedWithoutGMTooltip'}}" data-tooltip-class="character-tracker-tooltip">{{localize "character-tracker.ui.recordedWithoutGM"}}</span>
+                                                                            {{/if}}
                                                                         </div>
                                                                         <div class="log-detail-text">{{this.detail}}</div>
                                                                     </li>
@@ -180,6 +186,9 @@
                                                                         <div class="log-summary">
                                                                             <span class="log-time">[{{timeSince this.timestamp}}]</span>
                                                                             <span class="log-action">{{this.action}}</span>
+                                                                            {{#if this.recordedWithoutGM}}
+                                                                                <span class="log-offline-badge" data-tooltip="{{localize 'character-tracker.ui.recordedWithoutGMTooltip'}}" data-tooltip-class="character-tracker-tooltip">{{localize "character-tracker.ui.recordedWithoutGM"}}</span>
+                                                                            {{/if}}
                                                                         </div>
                                                                         <div class="log-detail-text">{{this.detail}}</div>
                                                                     </li>
@@ -200,6 +209,9 @@
                                                 <div class="log-summary">
                                                     <span class="log-time">[{{timeSince this.timestamp}}]</span>
                                                     <span class="log-action">{{this.action}}</span>
+                                                    {{#if this.recordedWithoutGM}}
+                                                        <span class="log-offline-badge" data-tooltip="{{localize 'character-tracker.ui.recordedWithoutGMTooltip'}}" data-tooltip-class="character-tracker-tooltip">{{localize "character-tracker.ui.recordedWithoutGM"}}</span>
+                                                    {{/if}}
                                                 </div>
                                                 <div class="log-detail-text">{{this.detail}}</div>
                                             </li>

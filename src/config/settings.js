@@ -6,12 +6,29 @@ export const MODULE_ID = "character-tracker";
 
 export const SETTING_KEYS = {
     LOG_STORE: "logStore",
-    TRACK_GM: "trackGM", // <-- New key
+    TRACK_GM: "trackGM",
+    RECORD_WITHOUT_GM: "recordWithoutGM",
 };
+
+/**
+ * Keys used for data the module stores in document flags (under `flags.character-tracker`).
+ */
+export const FLAG_KEYS = {
+    PENDING_LOGS: "pendingLogs",
+};
+
+/**
+ * Default for the "record changes when no GM is online" setting.
+ * When true, a player's own client queues their changes on the actor whenever no GM is connected,
+ * and the GM client merges them into the main log later. When false, the behaviour is opt-in and
+ * changes made with no GM connected are not recorded unless a GM enables the setting.
+ */
+export const RECORD_WITHOUT_GM_DEFAULT = true;
 
 export const SYSTEM_CONFIG = {
     MAX_ENTRIES: 500,
     SAVE_DELAY_MS: 500,
+    MAX_PENDING_ENTRIES: 500,
 };
 
 /**
@@ -37,5 +54,15 @@ export function registerSettings() {
         config: true,
         type: Boolean,
         default: false,
+    });
+
+    // User-facing toggle for recording changes while no GM is connected
+    game.settings.register(MODULE_ID, SETTING_KEYS.RECORD_WITHOUT_GM, {
+        name: game.i18n.localize("character-tracker.settings.recordWithoutGM.name"),
+        hint: game.i18n.localize("character-tracker.settings.recordWithoutGM.hint"),
+        scope: "world",
+        config: true,
+        type: Boolean,
+        default: RECORD_WITHOUT_GM_DEFAULT,
     });
 }

@@ -304,6 +304,16 @@
     text-transform: uppercase;
 }
 
+/* Marks entries queued by a player's own client while no GM was online */
+.character-tracker-window .log-offline-badge {
+    padding-inline: var(--filroden-space-xs);
+    border: 0.0625rem solid var(--filroden-color2-text-accent);
+    border-radius: var(--filroden-radius-small);
+    color: var(--filroden-color2-text-accent);
+    font-size: var(--filroden-font-size-xs);
+    text-transform: uppercase;
+}
+
 .character-tracker-window .log-detail-text {
     color: var(--filroden-color-text-main-solid);
 }

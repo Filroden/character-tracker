@@ -34,6 +34,29 @@ export class StateManager {
     }
 
     /**
+     * Adds entries that were queued on actors while no GM was connected.
+     * Entries already in the log (matched by their `pendingId`) are skipped, so merging the same
+     * queue twice is harmless. The log is then re-sorted by timestamp, because queued entries can be
+     * older than entries recorded directly since they were queued. Array sorting is stable, so entries
+     * that share a timestamp keep their existing relative order. The storage cap is applied after
+     * sorting so that the oldest entries are the ones removed, wherever they came from.
+     * @param {Array<object>} entries - The queued log entries, each carrying a `pendingId`.
+     * @returns {number} - The number of entries actually added.
+     */
+    static addMergedLogs(entries) {
+        const knownIds = new Set(StateManager.#sessionLogs.map((log) => log.pendingId).filter(Boolean));
+        const freshEntries = entries.filter((entry) => !knownIds.has(entry.pendingId));
+        if (freshEntries.length === 0) return 0;
+
+        StateManager.#sessionLogs.push(...freshEntries);
+        StateManager.#sessionLogs.sort((a, b) => a.timestamp - b.timestamp);
+        StateManager.#enforceStorageLimit();
+        StateManager.#debouncedSave();
+
+        return freshEntries.length;
+    }
+
+    /**
      * Retrieves logs, optionally filtered by a specific player's ID.
      * @param {string|null} userId - The ID of the user to filter by.
      * @returns {Array<object>} - A shallow copy of the filtered logs.
