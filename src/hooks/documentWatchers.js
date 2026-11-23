@@ -5,12 +5,21 @@
 import { StateManager } from "../data/StateManager.js";
 import { MODULE_ID, SETTING_KEYS } from "../config/settings.js";
 import { SystemMapper } from "../systems/SystemMapper.js";
+import { CHANGE_KEYS, CHANGE_SEPARATOR, formatChange } from "../utils/logFormatting.js";
+
+/**
+ * Shown when a field had no value before it was changed (for example, a newly added key).
+ */
+const EMPTY_VALUE = "—";
 
 /**
  * Registers the required document hooks.
  * Executed during the Foundry 'ready' phase.
  */
 export function registerDocumentWatchers() {
+    Hooks.on("preUpdateItem", handleEmbeddedPreUpdate);
+    Hooks.on("preUpdateActiveEffect", handleEmbeddedPreUpdate);
+    Hooks.on("preUpdateActor", handleActorPreUpdate);
     Hooks.on("createItem", handleItemCreation);
     Hooks.on("updateItem", handleItemUpdate);
     Hooks.on("deleteItem", handleItemDeletion);
@@ -42,6 +51,89 @@ function shouldProcessLog(actionAuthorId) {
 
     // If we reach this point, it was either a Player action, or a GM action with tracking enabled
     return true;
+}
+
+/* ===================================================================
+   --- PREVIOUS VALUE CAPTURE ---
+=================================================================== */
+
+/**
+ * Captures the pre-update values of an embedded Item or Active Effect.
+ * Only documents embedded directly on a world Actor are tracked, matching the update watchers.
+ */
+function handleEmbeddedPreUpdate(document, changes, options, _userId) {
+    if (document.parent?.documentName !== "Actor") return;
+    if (document.parent.isToken) return;
+
+    capturePreviousValues(document, changes, options);
+}
+
+/**
+ * Captures the pre-update values of a player-owned world Actor.
+ */
+function handleActorPreUpdate(actor, changes, options, _userId) {
+    if (actor.isToken) return;
+    if (!actor.hasPlayerOwner) return;
+
+    capturePreviousValues(actor, changes, options);
+}
+
+/**
+ * Records the current (soon to be previous) value of every tracked key in the pending update.
+ *
+ * Why the options object: preUpdate hooks only fire on the client that requested the update,
+ * while the log is written by a different client (normally the active GM) in the matching
+ * update hook. Foundry sends the update's options to the server and broadcasts them to every
+ * client with the result, so anything stored on them here arrives in that later hook's options.
+ * Everything stored must therefore stay JSON-serialisable.
+ *
+ * Why keyed by document ID: a batch update (updateEmbeddedDocuments) shares a single options
+ * object across every document in the operation, so values must be namespaced per document
+ * or one item's previous values would overwrite another's.
+ *
+ * Why `_source`: the update diff is computed against the stored source data. Reading the
+ * prepared document instead could return derived values (such as totals that include bonuses)
+ * that were never in the database.
+ *
+ * @param {foundry.abstract.Document} document - The document about to be updated.
+ * @param {object} changes - The pending update data.
+ * @param {object} options - The update options that travel with the operation.
+ */
+function capturePreviousValues(document, changes, options) {
+    const previous = {};
+
+    for (const key of getTrackedKeys(changes)) {
+        previous[key] = formatDisplayValue(foundry.utils.getProperty(document._source, key));
+    }
+
+    if (Object.keys(previous).length === 0) return;
+
+    options[MODULE_ID] ??= {};
+    options[MODULE_ID].previous ??= {};
+    options[MODULE_ID].previous[document.id] = previous;
+}
+
+/**
+ * Retrieves the previous values captured for a document by capturePreviousValues.
+ * @param {object} options - The update options received by the update hook.
+ * @param {string} documentId - The ID of the updated document.
+ * @returns {object} - A map of flattened key to formatted previous value (empty if none captured).
+ */
+function getCapturedValues(options, documentId) {
+    return options?.[MODULE_ID]?.previous?.[documentId] ?? {};
+}
+
+/**
+ * Lists the keys in an update that carry a single value worth showing as "was ➔ now".
+ * Token settings are deliberately excluded because they are only ever summarised.
+ * @param {object} update - The update data.
+ * @returns {Array<string>} - The tracked flattened keys.
+ */
+function getTrackedKeys(update) {
+    const keys = Object.keys(foundry.utils.flattenObject(update)).filter((key) => key.startsWith("system."));
+    if (update.name) keys.unshift(CHANGE_KEYS.NAME);
+
+    return keys;
 }
 
 /* ===================================================================
@@ -79,8 +171,8 @@ function handleItemUpdate(item, update, options, userId) {
     if (item.parent.isToken) return;
 
     // Utilise the exact same flattening extraction logic used for actors
-    const updateDetails = extractUpdateDetails(update);
-    if (updateDetails.length === 0) return;
+    const changes = extractUpdateChanges(update, getCapturedValues(options, item.id));
+    if (changes.length === 0) return;
 
     const itemType = formatDocumentType(item.type);
     const itemContext = `${itemType} (${item.name})`;
@@ -89,7 +181,8 @@ function handleItemUpdate(item, update, options, userId) {
         userId: userId,
         actorName: item.parent.name,
         action: "Item Modified",
-        detail: `${itemContext} | ${updateDetails.join(" | ")}`,
+        detail: `${itemContext}${CHANGE_SEPARATOR}${formatChangeList(changes)}`,
+        changes: changes,
         entityId: item.id,
         timestamp: Date.now(),
     };
@@ -151,14 +244,15 @@ function handleEffectUpdate(effect, update, options, userId) {
     if (effect.parent?.documentName !== "Actor") return;
     if (effect.parent.isToken) return;
 
-    const updateDetails = extractUpdateDetails(update);
-    if (updateDetails.length === 0) return;
+    const changes = extractUpdateChanges(update, getCapturedValues(options, effect.id));
+    if (changes.length === 0) return;
 
     const logEntry = {
         userId: userId,
         actorName: effect.parent.name,
         action: "Active Effect Modified",
-        detail: `Effect (${effect.name}) | ${updateDetails.join(" | ")}`,
+        detail: `Effect (${effect.name})${CHANGE_SEPARATOR}${formatChangeList(changes)}`,
+        changes: changes,
         entityId: effect.id,
         timestamp: Date.now(),
     };
@@ -198,14 +292,15 @@ function handleActorUpdate(actor, update, options, userId) {
     if (actor.isToken) return;
     if (!actor.hasPlayerOwner) return;
 
-    const details = extractUpdateDetails(update);
-    if (details.length === 0) return;
+    const changes = extractUpdateChanges(update, getCapturedValues(options, actor.id));
+    if (changes.length === 0) return;
 
     const logEntry = {
         userId: userId,
         actorName: actor.name,
         action: "Data Modified",
-        detail: details.join(" | "),
+        detail: formatChangeList(changes),
+        changes: changes,
         timestamp: Date.now(),
     };
 
@@ -213,27 +308,56 @@ function handleActorUpdate(actor, update, options, userId) {
 }
 
 /**
- * Examines the update object and extracts flattened keys and their new values.
+ * Examines the update object and builds a structured change record for each tracked key.
+ * The stored records are plain objects so the log stays JSON-serialisable (see logFormatting.js
+ * for the record shape).
  * @param {object} update - The diff object provided by the hook.
- * @returns {Array<string>} - A formatted list of exact changes.
+ * @param {object} previous - Formatted previous values captured in the matching preUpdate hook.
+ * @returns {Array<object>} - The structured change records, in display order.
  */
-function extractUpdateDetails(update) {
-    const details = [];
+function extractUpdateChanges(update, previous) {
+    const changes = [];
 
     // 1. Explicit top-level checks
-    if (update.name) details.push(`Name ➔ ${update.name}`);
-    if (update.prototypeToken) details.push("Token Settings Modified");
+    if (update.name) changes.push(buildValueChange(CHANGE_KEYS.NAME, previous[CHANGE_KEYS.NAME], update.name));
+
+    // Token settings are a large nested object, so they are summarised rather than itemised
+    if (update.prototypeToken) changes.push({ key: CHANGE_KEYS.TOKEN });
 
     // 2. Flatten the entire payload to safely catch BOTH nested and flat data structures
     const flatUpdate = foundry.utils.flattenObject(update);
 
     for (const [key, value] of Object.entries(flatUpdate)) {
-        if (key.startsWith("system.")) {
-            details.push(`${key} ➔ ${formatDisplayValue(value)}`);
-        }
+        if (key.startsWith("system.")) changes.push(buildValueChange(key, previous[key], value));
     }
 
-    return details;
+    return changes;
+}
+
+/**
+ * Builds a single change record.
+ * The `from` property is left out entirely when no previous value was captured, which keeps
+ * "unknown" distinct from a genuine empty or null value.
+ * @param {string} key - The flattened key.
+ * @param {*} previousValue - The formatted previous value, or undefined if none was captured.
+ * @param {*} newValue - The raw new value from the update.
+ * @returns {object} - The change record.
+ */
+function buildValueChange(key, previousValue, newValue) {
+    const change = { key };
+    if (previousValue !== undefined) change.from = previousValue;
+    change.to = formatDisplayValue(newValue);
+
+    return change;
+}
+
+/**
+ * Joins change records into the stored `detail` string used by the export and older views.
+ * @param {Array<object>} changes - The change records.
+ * @returns {string} - The formatted detail text.
+ */
+function formatChangeList(changes) {
+    return changes.map((change) => formatChange(change)).join(CHANGE_SEPARATOR);
 }
 
 /**
@@ -242,6 +366,7 @@ function extractUpdateDetails(update) {
  * @returns {string|number|boolean} - The formatted display value.
  */
 function formatDisplayValue(value) {
+    if (value === undefined) return EMPTY_VALUE;
     if (value === "") return '""';
     if (value === null) return "null";
 

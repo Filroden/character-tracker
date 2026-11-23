@@ -6,6 +6,7 @@ import { StateManager } from "../data/StateManager.js";
 import { exportPlayerLogs } from "../utils/exportHelpers.js";
 import { MODULE_ID, SETTING_KEYS } from "../config/settings.js";
 import { SystemMapper } from "../systems/SystemMapper.js";
+import { CHANGE_SEPARATOR, VALUE_ARROW, defaultChangeLabel, formatChange } from "../utils/logFormatting.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 
@@ -126,30 +127,62 @@ export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * Safely translates system keys for UI presentation without mutating the database object.
+     * For core data changes it also attaches `detailParts` (one { name, text } pair per changed
+     * key), which the categorical view uses to file each change under its own stat.
      */
     #translateLog(log) {
         const displayLog = { ...log };
 
         if (displayLog.action !== "Data Modified") return displayLog;
 
-        displayLog.detail = displayLog.detail
-            .split(" | ")
-            .map((part) => {
-                const [rawKey, val] = part.split(" ➔ ");
+        // Entries recorded before structured changes existed only carry the joined detail string
+        displayLog.detailParts = Array.isArray(log.changes) ? AuditLogApp.#partsFromChanges(log.changes) : AuditLogApp.#partsFromLegacyDetail(log.detail);
 
-                if (val !== undefined && rawKey.startsWith("system.")) {
-                    const translatedKey = SystemMapper.translate(rawKey);
-
-                    // Appends the raw key in brackets only if a translation was successfully found
-                    const displayKey = translatedKey === rawKey ? rawKey : `${translatedKey} (${rawKey})`;
-
-                    return `${displayKey} ➔ ${val}`;
-                }
-                return part;
-            })
-            .join(" | ");
+        displayLog.detail = displayLog.detailParts.map((part) => part.text).join(CHANGE_SEPARATOR);
 
         return displayLog;
+    }
+
+    /**
+     * Builds display parts from structured change records.
+     * @param {Array<object>} changes - The change records stored on the log entry.
+     * @returns {Array<{name: string, text: string}>}
+     */
+    static #partsFromChanges(changes) {
+        return changes.map((change) => {
+            const label = change.key.startsWith("system.") ? AuditLogApp.#translateKey(change.key) : defaultChangeLabel(change);
+            return { name: label, text: formatChange(change, label) };
+        });
+    }
+
+    /**
+     * Builds display parts by parsing a legacy "key ➔ value | key ➔ value" detail string.
+     * @param {string} detail - The stored detail string.
+     * @returns {Array<{name: string, text: string}>}
+     */
+    static #partsFromLegacyDetail(detail) {
+        return detail.split(CHANGE_SEPARATOR).map((part) => {
+            const [rawKey, val] = part.split(VALUE_ARROW);
+
+            // Parts without an arrow (such as "Token Settings Modified") are their own label
+            if (val === undefined) return { name: part, text: part };
+
+            const label = AuditLogApp.#translateKey(rawKey);
+            return { name: label, text: `${label}${VALUE_ARROW}${val}` };
+        });
+    }
+
+    /**
+     * Translates a raw system key, appending the raw key in brackets only if a translation was
+     * successfully found. Non-system keys are returned unchanged.
+     * @param {string} rawKey - The flattened key.
+     * @returns {string}
+     */
+    static #translateKey(rawKey) {
+        if (!rawKey.startsWith("system.")) return rawKey;
+
+        const translatedKey = SystemMapper.translate(rawKey);
+        return translatedKey === rawKey ? rawKey : `${translatedKey} (${rawKey})`;
     }
 
     /**
@@ -209,60 +242,86 @@ export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
         const counts = { core: 0, items: 0, effects: 0 };
 
         logs.forEach((log) => {
-            let entityName = "Unknown";
-            let targetMap = null;
-            let targetCountKey = null;
+            for (const placement of AuditLogApp.#resolvePlacements(log)) {
+                // Increment the total action count for this specific category
+                counts[placement.bucket]++;
 
-            if (log.action === "Data Modified") {
-                targetMap = buckets.core;
-                targetCountKey = "core";
-                entityName = log.detail.split(" ➔ ")[0];
-            } else if (log.action.includes("Item")) {
-                targetMap = buckets.items;
-                targetCountKey = "items";
-
-                if (log.action === "Item Modified") {
-                    entityName = log.detail.split(" | ")[0];
-                } else {
-                    const parts = log.detail.split(" ➔ ");
-                    entityName = parts.length === 2 ? `${parts[0]} (${parts[1]})` : log.detail;
+                const targetMap = buckets[placement.bucket];
+                if (!targetMap.has(placement.groupKey)) {
+                    targetMap.set(placement.groupKey, { name: placement.name, logs: [] });
                 }
-            } else if (log.action.includes("Effect")) {
-                targetMap = buckets.effects;
-                targetCountKey = "effects";
-
-                if (log.action === "Active Effect Modified") {
-                    entityName = log.detail.split(" | ")[0];
-                } else {
-                    entityName = `Effect (${log.detail})`;
-                }
+                targetMap.get(placement.groupKey).logs.push(placement.log);
             }
-
-            if (!targetMap) return;
-
-            // Increment the total action count for this specific category
-            counts[targetCountKey]++;
-
-            // FALLBACK LOGIC: Use the saved ID to prevent identical name collisions.
-            // If it is a v1.0.0 legacy log (or core data), fallback to the string name.
-            const groupKey = log.entityId || entityName;
-
-            // Group the log under the highly specific unique key
-            if (!targetMap.has(groupKey)) {
-                targetMap.set(groupKey, { name: entityName, logs: [] });
-            }
-            targetMap.get(groupKey).logs.push(log);
         });
 
         // Return flat, alphabetically sorted arrays and their respective total action counts
+        const sortByName = (a, b) => a.name.localeCompare(b.name);
         return {
-            core: Array.from(buckets.core.values()).sort((a, b) => a.name.localeCompare(b.name)),
+            core: Array.from(buckets.core.values()).sort(sortByName),
             coreCount: counts.core,
-            items: Array.from(buckets.items.values()).sort((a, b) => a.name.localeCompare(b.name)),
+            items: Array.from(buckets.items.values()).sort(sortByName),
             itemsCount: counts.items,
-            effects: Array.from(buckets.effects.values()).sort((a, b) => a.name.localeCompare(b.name)),
+            effects: Array.from(buckets.effects.values()).sort(sortByName),
             effectsCount: counts.effects,
         };
+    }
+
+    /**
+     * Works out which bucket and entity group(s) a log belongs to.
+     * @param {object} log - A translated display log.
+     * @returns {Array<{bucket: string, groupKey: string, name: string, log: object}>}
+     */
+    static #resolvePlacements(log) {
+        if (log.action === "Data Modified") return AuditLogApp.#resolveCorePlacements(log);
+        if (log.action.includes("Item")) return [AuditLogApp.#buildPlacement("items", log, AuditLogApp.#resolveItemName(log))];
+        if (log.action.includes("Effect")) return [AuditLogApp.#buildPlacement("effects", log, AuditLogApp.#resolveEffectName(log))];
+
+        return [];
+    }
+
+    /**
+     * Splits a core data log into one placement per changed key.
+     * A single update can change several stats at once; filing the whole entry under only the
+     * first stat would hide the other changes from those stats' histories. Each placement gets
+     * a copy of the log whose detail holds only its own change.
+     * @param {object} log - A translated "Data Modified" display log (with detailParts).
+     * @returns {Array<object>}
+     */
+    static #resolveCorePlacements(log) {
+        return log.detailParts.map((part) => ({
+            bucket: "core",
+            groupKey: part.name,
+            name: part.name,
+            log: { ...log, detail: part.text },
+        }));
+    }
+
+    /**
+     * Builds a placement for an item or effect log.
+     * Uses the saved entity ID to prevent identical name collisions, falling back to the name
+     * for v1.0.0 legacy logs that have no ID.
+     */
+    static #buildPlacement(bucket, log, name) {
+        return { bucket, groupKey: log.entityId || name, name, log };
+    }
+
+    /**
+     * Derives the display name of the item an item log refers to.
+     */
+    static #resolveItemName(log) {
+        if (log.action === "Item Modified") return log.detail.split(CHANGE_SEPARATOR)[0];
+
+        const parts = log.detail.split(VALUE_ARROW);
+        return parts.length === 2 ? `${parts[0]} (${parts[1]})` : log.detail;
+    }
+
+    /**
+     * Derives the display name of the effect an effect log refers to.
+     */
+    static #resolveEffectName(log) {
+        if (log.action === "Active Effect Modified") return log.detail.split(CHANGE_SEPARATOR)[0];
+
+        return `Effect (${log.detail})`;
     }
 
     /**
@@ -331,6 +390,7 @@ export class AuditLogApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * Action handler: Toggles between chronological and categorical views.
+     * @this {AuditLogApp}
      */
     static async #handleToggleView(event, target) {
         this.#viewMode = this.#viewMode === "chronological" ? "categorical" : "chronological";
