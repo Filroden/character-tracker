@@ -14,6 +14,38 @@ import { CHANGE_KEYS, CHANGE_SEPARATOR, formatChange } from "../utils/logFormatt
 const EMPTY_VALUE = "—";
 
 /**
+ * The top-level fields whose changes are logged on each document type (as well as `name`, which is
+ * handled separately). A key is tracked if it is one of these fields or sits inside one of them,
+ * so "duration" covers "duration.rounds" and "system" covers every system data path.
+ *
+ * Active effects also track their own core fields, because those hold what matters about an effect:
+ * whether it is on, what it modifies and how long it lasts. In Foundry v13 the modifiers are the
+ * top-level `changes` array; in v14 they can sit in the effect's type data (`system.changes`), which
+ * the "system" entry already covers. Both are listed so either layout is logged.
+ *
+ * Deliberately not tracked: `description` (rich HTML that would bloat the log and is not a mechanical
+ * change), and cosmetic or ordering fields such as `img`, `tint`, `sort` and `showIcon`.
+ */
+const TRACKED_FIELDS = Object.freeze({
+    Actor: ["system"],
+    Item: ["system"],
+    ActiveEffect: ["system", "disabled", "changes", "duration", "statuses"],
+});
+
+/**
+ * Keys inside tracked fields that core updates on its own as time or combat passes. They describe
+ * when an effect started or whether it has run out, not a choice a player made, so logging them
+ * would only add noise.
+ */
+const IGNORED_KEYS = new Set([
+    "duration.startTime",
+    "duration.startRound",
+    "duration.startTurn",
+    "duration.combat",
+    "duration.expired",
+]);
+
+/**
  * Registers the required document hooks.
  * Executed during the Foundry 'ready' phase.
  */
@@ -140,7 +172,7 @@ function handleActorPreUpdate(actor, changes, options, _userId) {
 function capturePreviousValues(document, changes, options) {
     const previous = {};
 
-    for (const key of getTrackedKeys(changes)) {
+    for (const key of getTrackedKeys(changes, document.documentName)) {
         previous[key] = formatDisplayValue(foundry.utils.getProperty(document._source, key));
     }
 
@@ -162,13 +194,27 @@ function getCapturedValues(options, documentId) {
 }
 
 /**
+ * Checks whether a flattened key should be logged for a given document type (see TRACKED_FIELDS).
+ * @param {string} documentName - The document type, such as "Actor", "Item" or "ActiveEffect".
+ * @param {string} key - The flattened key.
+ * @returns {boolean} - True if changes to this key are logged.
+ */
+function isTrackedKey(documentName, key) {
+    if (IGNORED_KEYS.has(key)) return false;
+
+    const fields = TRACKED_FIELDS[documentName] ?? [];
+    return fields.some((field) => key === field || key.startsWith(`${field}.`));
+}
+
+/**
  * Lists the keys in an update that carry a single value worth showing as "was ➔ now".
  * Token settings are deliberately excluded because they are only ever summarised.
  * @param {object} update - The update data.
+ * @param {string} documentName - The type of the document being updated.
  * @returns {Array<string>} - The tracked flattened keys.
  */
-function getTrackedKeys(update) {
-    const keys = Object.keys(foundry.utils.flattenObject(update)).filter((key) => key.startsWith("system."));
+function getTrackedKeys(update, documentName) {
+    const keys = Object.keys(foundry.utils.flattenObject(update)).filter((key) => isTrackedKey(documentName, key));
     if (update.name) keys.unshift(CHANGE_KEYS.NAME);
 
     return keys;
@@ -211,7 +257,7 @@ function handleItemUpdate(item, update, options, userId) {
     if (item.parent.isToken) return;
 
     // Utilise the exact same flattening extraction logic used for actors
-    const changes = extractUpdateChanges(update, getCapturedValues(options, item.id));
+    const changes = extractUpdateChanges(update, getCapturedValues(options, item.id), item.documentName);
     if (changes.length === 0) return;
 
     const itemType = formatDocumentType(item.type);
@@ -287,7 +333,7 @@ function handleEffectUpdate(effect, update, options, userId) {
     if (effect.parent?.documentName !== "Actor") return;
     if (effect.parent.isToken) return;
 
-    const changes = extractUpdateChanges(update, getCapturedValues(options, effect.id));
+    const changes = extractUpdateChanges(update, getCapturedValues(options, effect.id), effect.documentName);
     if (changes.length === 0) return;
 
     const logEntry = {
@@ -340,7 +386,7 @@ function handleActorUpdate(actor, update, options, userId) {
     if (actor.isToken) return;
     if (!actor.hasPlayerOwner) return;
 
-    const changes = extractUpdateChanges(update, getCapturedValues(options, actor.id));
+    const changes = extractUpdateChanges(update, getCapturedValues(options, actor.id), actor.documentName);
     if (changes.length === 0) return;
 
     const logEntry = {
@@ -361,9 +407,10 @@ function handleActorUpdate(actor, update, options, userId) {
  * for the record shape).
  * @param {object} update - The diff object provided by the hook.
  * @param {object} previous - Formatted previous values captured in the matching preUpdate hook.
+ * @param {string} documentName - The type of the updated document, which decides the tracked keys.
  * @returns {Array<object>} - The structured change records, in display order.
  */
-function extractUpdateChanges(update, previous) {
+function extractUpdateChanges(update, previous, documentName) {
     const changes = [];
 
     // 1. Explicit top-level checks
@@ -372,11 +419,12 @@ function extractUpdateChanges(update, previous) {
     // Token settings are a large nested object, so they are summarised rather than itemised
     if (update.prototypeToken) changes.push({ key: CHANGE_KEYS.TOKEN });
 
-    // 2. Flatten the entire payload to safely catch BOTH nested and flat data structures
+    // 2. Flatten the entire payload to safely catch BOTH nested and flat data structures.
+    // Arrays (such as an effect's `changes`) are not flattened, so they arrive as one value.
     const flatUpdate = foundry.utils.flattenObject(update);
 
     for (const [key, value] of Object.entries(flatUpdate)) {
-        if (key.startsWith("system.")) changes.push(buildValueChange(key, previous[key], value));
+        if (isTrackedKey(documentName, key)) changes.push(buildValueChange(key, previous[key], value));
     }
 
     return changes;
@@ -419,7 +467,7 @@ function formatDisplayValue(value) {
     if (value === null) return "null";
 
     // Natively intercept arrays and flatten their contents
-    if (Array.isArray(value)) return `[${value.join(", ")}]`;
+    if (Array.isArray(value)) return `[${value.map(formatArrayElement).join(", ")}]`;
 
     // Natively intercept empty objects used to clear data states
     if (typeof value === "object" && Object.keys(value).length === 0) return "{}";
@@ -427,6 +475,44 @@ function formatDisplayValue(value) {
     if (typeof value === "object") return "[Object]";
 
     return value;
+}
+
+/**
+ * Formats one element of an array value. Plain values are shown as they are. Objects that look like
+ * active effect modifiers (they have a `key`) are shown as "key MODE value", because listing them as
+ * "[object Object]" would hide what actually changed. Any other object is summarised.
+ * @param {*} element - One array element.
+ * @returns {string|number|boolean} - The formatted element.
+ */
+function formatArrayElement(element) {
+    if (element === null || typeof element !== "object") return element;
+    if ("key" in element) return formatEffectModifier(element);
+    return "[Object]";
+}
+
+/**
+ * Formats an active effect modifier.
+ * Foundry v14 names the modification with a string `type` (such as "add"). Foundry v13 uses a numeric
+ * `mode`, which is turned back into its CONST.ACTIVE_EFFECT_MODES name (such as "ADD"). The constant
+ * is only read for v13-style data, so v14 never touches it.
+ * @param {object} modifier - The modifier ({ key, value, and type or mode }).
+ * @returns {string} - For example "system.stats.St.temp ADD 5".
+ */
+function formatEffectModifier(modifier) {
+    const operation = modifier.type ?? findModeName(modifier.mode);
+    return [modifier.key, operation, modifier.value].filter((part) => part !== undefined && part !== "").join(" ");
+}
+
+/**
+ * Looks up the name of a v13 numeric effect mode.
+ * @param {number|undefined} mode - The numeric mode.
+ * @returns {string|number|undefined} - The mode's name, or the raw mode if it has no name.
+ */
+function findModeName(mode) {
+    if (mode === undefined) return undefined;
+
+    const modes = CONST.ACTIVE_EFFECT_MODES ?? {};
+    return Object.keys(modes).find((name) => modes[name] === mode) ?? mode;
 }
 
 /**

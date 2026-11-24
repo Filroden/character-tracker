@@ -1,232 +1,226 @@
+{{!
+    The Character Tracker window: the player list at the start edge, and the selected player's log
+    beside it under a context bar. Only one player's log is shown at a time.
+}}
 <div class="character-tracker-layout">
 
-    <aside class="character-tracker-sidebar">
-        <nav class="character-tracker-nav character-tracker-window-scrollable">
-            <h2 class="character-tracker-sidebar-header">{{localize "character-tracker.ui.players"}}</h2>
+    <aside class="character-tracker-players">
+        <div class="character-tracker-players__head">
+            <h2 class="character-tracker-section-title">{{localize "character-tracker.ui.players"}}</h2>
+
+            <div class="character-tracker-appearance">
+                <button
+                    type="button"
+                    data-action="toggleAppearance"
+                    class="character-tracker-btn character-tracker-btn--square character-tracker-btn--quiet character-tracker-appearance__button"
+                    aria-haspopup="menu"
+                    aria-expanded="false"
+                    aria-label="{{localize 'character-tracker.ui.appearance'}}"
+                    data-tooltip="{{localize 'character-tracker.ui.appearanceTooltip'}}"
+                    data-tooltip-class="{{tooltipClass}}"
+                >
+                    <i class="character-tracker-icon character-tracker-icon--row palette" aria-hidden="true"></i>
+                </button>
+
+                <div class="character-tracker-popover character-tracker-appearance__menu" role="menu" aria-label="{{localize 'character-tracker.ui.appearance'}}" hidden>
+                    <div class="character-tracker-menu-head">{{localize "character-tracker.ui.accentColor"}}</div>
+                    {{#each accents}}
+                        <button
+                            type="button"
+                            role="menuitemradio"
+                            data-action="setAccent"
+                            data-accent="{{this.id}}"
+                            class="character-tracker-menu-item"
+                            aria-checked="{{#if this.isActive}}true{{else}}false{{/if}}"
+                        >
+                            <span class="character-tracker-tick{{#if this.isActive}} character-tracker-tick--on{{/if}}" aria-hidden="true"></span>
+                            <span class="character-tracker-swatch character-tracker-swatch--{{this.id}}" aria-hidden="true"></span>
+                            {{localize this.label}}
+                        </button>
+                    {{/each}}
+                    <p class="character-tracker-menu-hint">{{localize "character-tracker.ui.appearanceHint"}}</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="character-tracker-players__list" aria-label="{{localize 'character-tracker.ui.players'}}">
             {{#each players}}
-                <button type="button" data-action="scrollToPlayer" data-target="{{this.id}}" class="character-tracker-nav-link">
-                    <i class="character-tracker-icon person"></i>
-                    <span>{{this.name}}</span>
+                <button
+                    type="button"
+                    data-action="selectPlayer"
+                    data-user-id="{{this.id}}"
+                    class="character-tracker-player{{#unless this.totalChanges}} character-tracker-player--empty{{/unless}}"
+                    {{#if this.isSelected}}aria-current="true"{{/if}}
+                >
+                    <i class="character-tracker-icon character-tracker-icon--row person" aria-hidden="true"></i>
+                    <span class="character-tracker-player__name">{{this.name}}</span>
+                    {{#if this.isGM}}<span class="character-tracker-tag">{{localize "character-tracker.ui.gmTag"}}</span>{{/if}}
+                    <span class="character-tracker-count">{{this.totalChanges}}</span>
                 </button>
             {{/each}}
         </nav>
 
-        <div class="character-tracker-global-actions">
-            <button
-                type="button"
-                data-action="toggleView"
-                class="character-tracker-btn primary"
-                data-tooltip="{{localize 'character-tracker.ui.toggleView'}}"
-                data-tooltip-class="character-tracker-tooltip"
-            >
-                <i class="character-tracker-icon filter"></i>
-            </button>
-            <button
-                type="button"
-                data-action="refreshLog"
-                class="character-tracker-btn primary"
-                data-tooltip="{{localize 'character-tracker.ui.refresh'}}"
-                data-tooltip-class="character-tracker-tooltip"
-            >
-                <i class="character-tracker-icon refresh"></i>
-            </button>
+        <div class="character-tracker-players__foot">
             <button
                 type="button"
                 data-action="clearAll"
-                class="character-tracker-btn danger"
+                class="character-tracker-btn character-tracker-btn--danger"
                 data-tooltip="{{localize 'character-tracker.ui.clearAllHint'}}"
-                data-tooltip-class="character-tracker-tooltip"
+                data-tooltip-class="{{tooltipClass}}"
+                {{#unless hasAnyLogs}}disabled{{/unless}}
             >
-                <i class="character-tracker-icon delete"></i>
+                <i class="character-tracker-icon character-tracker-icon--row delete" aria-hidden="true"></i>
                 {{localize "character-tracker.ui.clearAll"}}
             </button>
         </div>
     </aside>
 
-    <main class="character-tracker-content character-tracker-window-scrollable">
-        {{#each players}}
-            <section id="character-tracker-player-{{this.id}}" class="character-tracker-player-section">
-
-                <header class="character-tracker-player-header">
-                    <div class="character-tracker-player-title">
-                        <i class="character-tracker-icon person"></i>
-                        {{this.name}}
+    <main class="character-tracker-main">
+        {{#if currentPlayer}}
+            {{#with currentPlayer}}
+                <header class="character-tracker-context">
+                    <div class="character-tracker-context__title">
+                        <h1 class="character-tracker-panel-title">{{this.name}}</h1>
+                        <span class="character-tracker-stats">{{this.statsText}}</span>
                     </div>
-                    <div class="character-tracker-player-actions">
+
+                    <div class="character-tracker-context__actions">
+                        <button
+                            type="button"
+                            data-action="refreshLog"
+                            class="character-tracker-btn character-tracker-btn--square"
+                            aria-label="{{localize 'character-tracker.ui.refresh'}}"
+                            data-tooltip="{{localize 'character-tracker.ui.refresh'}}"
+                            data-tooltip-class="{{@root.tooltipClass}}"
+                        >
+                            <i class="character-tracker-icon character-tracker-icon--row refresh" aria-hidden="true"></i>
+                        </button>
                         <button
                             type="button"
                             data-action="exportPlayer"
                             data-user-id="{{this.id}}"
-                            class="character-tracker-btn primary"
+                            class="character-tracker-btn character-tracker-btn--square"
+                            aria-label="{{localize 'character-tracker.ui.exportTooltip'}}"
                             data-tooltip="{{localize 'character-tracker.ui.exportTooltip'}}"
-                            data-tooltip-class="character-tracker-tooltip"
+                            data-tooltip-class="{{@root.tooltipClass}}"
+                            {{#unless this.characters.length}}disabled{{/unless}}
                         >
-                            <i class="character-tracker-icon download"></i>
+                            <i class="character-tracker-icon character-tracker-icon--row download" aria-hidden="true"></i>
                         </button>
                         <button
                             type="button"
                             data-action="clearPlayer"
                             data-user-id="{{this.id}}"
-                            class="character-tracker-btn danger"
+                            class="character-tracker-btn character-tracker-btn--square character-tracker-btn--icon-danger"
+                            aria-label="{{localize 'character-tracker.ui.clearTooltip'}}"
                             data-tooltip="{{localize 'character-tracker.ui.clearTooltip'}}"
-                            data-tooltip-class="character-tracker-tooltip"
+                            data-tooltip-class="{{@root.tooltipClass}}"
+                            {{#unless this.characters.length}}disabled{{/unless}}
                         >
-                            <i class="character-tracker-icon delete"></i>
+                            <i class="character-tracker-icon character-tracker-icon--row delete" aria-hidden="true"></i>
+                        </button>
+                    </div>
+
+                    <div class="character-tracker-context__modes">
+                        <div class="character-tracker-seg" role="radiogroup" aria-label="{{localize 'character-tracker.ui.viewLabel'}}">
+                            <button
+                                type="button"
+                                role="radio"
+                                data-action="setView"
+                                data-view="chronological"
+                                class="character-tracker-seg__option"
+                                aria-checked="{{#if @root.isCategorical}}false{{else}}true{{/if}}"
+                            >{{localize "character-tracker.ui.viewChronological"}}</button>
+                            <button
+                                type="button"
+                                role="radio"
+                                data-action="setView"
+                                data-view="categorical"
+                                class="character-tracker-seg__option"
+                                aria-checked="{{#if @root.isCategorical}}true{{else}}false{{/if}}"
+                            >{{localize "character-tracker.ui.viewCategorical"}}</button>
+                        </div>
+
+                        <button
+                            type="button"
+                            data-action="toggleReverted"
+                            class="character-tracker-btn"
+                            aria-pressed="{{#if @root.showReverted}}true{{else}}false{{/if}}"
+                            data-tooltip="{{localize 'character-tracker.ui.expandRevertedTooltip'}}"
+                            data-tooltip-class="{{@root.tooltipClass}}"
+                        >
+                            <i class="character-tracker-icon character-tracker-icon--row undo" aria-hidden="true"></i>
+                            {{localize "character-tracker.ui.expandReverted"}}
                         </button>
                     </div>
                 </header>
 
-                {{#if this.characters.length}}
-                    <div class="character-tracker-stats-bar">
-                        <span class="stat-badge"><strong>{{localize "character-tracker.ui.totalChanges"}}:</strong> {{this.stats.totalChanges}}</span>
-                        {{#if this.stats.lastActivity}}
-                            <span class="stat-badge"><strong>{{localize "character-tracker.ui.lastActivity"}}:</strong> {{timeSince this.stats.lastActivity}}</span>
-                        {{/if}}
-                    </div>
+                <div class="character-tracker-log">
+                    {{#each this.characters}}
+                        <details class="character-tracker-card" data-section-key="{{this.key}}" {{#if this.open}}open{{/if}}>
+                            <summary class="character-tracker-card__summary">
+                                <i class="character-tracker-icon character-tracker-icon--row character-tracker-chevron chevron" aria-hidden="true"></i>
+                                <i class="character-tracker-icon character-tracker-icon--row person" aria-hidden="true"></i>
+                                <span class="character-tracker-card__name">{{this.name}}</span>
+                                <span class="character-tracker-count">{{this.count}}</span>
+                            </summary>
 
-                    <div class="character-tracker-characters">
-                        {{#each this.characters}}
-                            <details class="character-tracker-accordion">
-                                <summary class="accordion-header">
-                                    <span class="accordion-title">
-                                        <i class="character-tracker-icon person"></i>
-                                        {{this.name}}
-                                    </span>
-                                    <span class="accordion-count">{{this.logs.length}}</span>
-                                </summary>
-
-                                {{#if @root.isCategorical}}
-                                    <div class="character-tracker-categorical-view">
-
-                                        {{! Core Data Bucket }}
-                                        {{#if this.categories.core.length}}
-                                            <details class="character-tracker-accordion sub-accordion">
-                                                <summary class="accordion-header">
-                                                    <span class="accordion-title">{{localize "character-tracker.ui.catCore"}}</span>
-                                                    <span class="accordion-count">{{this.categories.coreCount}}</span>
-                                                </summary>
-                                                <div class="character-tracker-entity-list">
-                                                    {{#each this.categories.core}}
-                                                        <details class="character-tracker-accordion entity-accordion">
-                                                            <summary class="accordion-header">
-                                                                <span class="accordion-title">{{this.name}}</span>
-                                                                <span class="accordion-count">{{this.logs.length}}</span>
-                                                            </summary>
-                                                            <ul class="character-tracker-log-list">
-                                                                {{#each this.logs}}
-                                                                    <li class="character-tracker-log-entry">
-                                                                        <div class="log-summary">
-                                                                            <span class="log-time">[{{timeSince this.timestamp}}]</span>
-                                                                            <span class="log-action">{{this.action}}</span>
-                                                                            {{#if this.recordedWithoutGM}}
-                                                                                <span class="log-offline-badge" data-tooltip="{{localize 'character-tracker.ui.recordedWithoutGMTooltip'}}" data-tooltip-class="character-tracker-tooltip">{{localize "character-tracker.ui.recordedWithoutGM"}}</span>
-                                                                            {{/if}}
-                                                                        </div>
-                                                                        <div class="log-detail-text">{{this.detail}}</div>
-                                                                    </li>
-                                                                {{/each}}
-                                                            </ul>
-                                                        </details>
-                                                    {{/each}}
-                                                </div>
-                                            </details>
-                                        {{/if}}
-
-                                        {{! Items & Inventory Bucket }}
-                                        {{#if this.categories.items.length}}
-                                            <details class="character-tracker-accordion sub-accordion">
-                                                <summary class="accordion-header">
-                                                    <span class="accordion-title">{{localize "character-tracker.ui.catItems"}}</span>
-                                                    <span class="accordion-count">{{this.categories.itemsCount}}</span>
-                                                </summary>
-                                                <div class="character-tracker-entity-list">
-                                                    {{#each this.categories.items}}
-                                                        <details class="character-tracker-accordion entity-accordion">
-                                                            <summary class="accordion-header">
-                                                                <span class="accordion-title">{{this.name}}</span>
-                                                                <span class="accordion-count">{{this.logs.length}}</span>
-                                                            </summary>
-                                                            <ul class="character-tracker-log-list">
-                                                                {{#each this.logs}}
-                                                                    <li class="character-tracker-log-entry">
-                                                                        <div class="log-summary">
-                                                                            <span class="log-time">[{{timeSince this.timestamp}}]</span>
-                                                                            <span class="log-action">{{this.action}}</span>
-                                                                            {{#if this.recordedWithoutGM}}
-                                                                                <span class="log-offline-badge" data-tooltip="{{localize 'character-tracker.ui.recordedWithoutGMTooltip'}}" data-tooltip-class="character-tracker-tooltip">{{localize "character-tracker.ui.recordedWithoutGM"}}</span>
-                                                                            {{/if}}
-                                                                        </div>
-                                                                        <div class="log-detail-text">{{this.detail}}</div>
-                                                                    </li>
-                                                                {{/each}}
-                                                            </ul>
-                                                        </details>
-                                                    {{/each}}
-                                                </div>
-                                            </details>
-                                        {{/if}}
-
-                                        {{! Active Effects Bucket }}
-                                        {{#if this.categories.effects.length}}
-                                            <details class="character-tracker-accordion sub-accordion">
-                                                <summary class="accordion-header">
-                                                    <span class="accordion-title">{{localize "character-tracker.ui.catEffects"}}</span>
-                                                    <span class="accordion-count">{{this.categories.effectsCount}}</span>
-                                                </summary>
-                                                <div class="character-tracker-entity-list">
-                                                    {{#each this.categories.effects}}
-                                                        <details class="character-tracker-accordion entity-accordion">
-                                                            <summary class="accordion-header">
-                                                                <span class="accordion-title">{{this.name}}</span>
-                                                                <span class="accordion-count">{{this.logs.length}}</span>
-                                                            </summary>
-                                                            <ul class="character-tracker-log-list">
-                                                                {{#each this.logs}}
-                                                                    <li class="character-tracker-log-entry">
-                                                                        <div class="log-summary">
-                                                                            <span class="log-time">[{{timeSince this.timestamp}}]</span>
-                                                                            <span class="log-action">{{this.action}}</span>
-                                                                            {{#if this.recordedWithoutGM}}
-                                                                                <span class="log-offline-badge" data-tooltip="{{localize 'character-tracker.ui.recordedWithoutGMTooltip'}}" data-tooltip-class="character-tracker-tooltip">{{localize "character-tracker.ui.recordedWithoutGM"}}</span>
-                                                                            {{/if}}
-                                                                        </div>
-                                                                        <div class="log-detail-text">{{this.detail}}</div>
-                                                                    </li>
-                                                                {{/each}}
-                                                            </ul>
-                                                        </details>
-                                                    {{/each}}
-                                                </div>
-                                            </details>
-                                        {{/if}}
-
-                                    </div>
-                                {{else}}
-                                    {{! Standard Chronological Fallback }}
-                                    <ul class="character-tracker-log-list">
-                                        {{#each this.logs}}
-                                            <li class="character-tracker-log-entry">
-                                                <div class="log-summary">
-                                                    <span class="log-time">[{{timeSince this.timestamp}}]</span>
-                                                    <span class="log-action">{{this.action}}</span>
-                                                    {{#if this.recordedWithoutGM}}
-                                                        <span class="log-offline-badge" data-tooltip="{{localize 'character-tracker.ui.recordedWithoutGMTooltip'}}" data-tooltip-class="character-tracker-tooltip">{{localize "character-tracker.ui.recordedWithoutGM"}}</span>
-                                                    {{/if}}
-                                                </div>
-                                                <div class="log-detail-text">{{this.detail}}</div>
-                                            </li>
-                                        {{/each}}
-                                    </ul>
-                                {{/if}}
-                            </details>
-                        {{/each}}
-                    </div>
-                {{else}}
-                    <p class="character-tracker-empty">{{localize "character-tracker.ui.noLogs"}}</p>
-                {{/if}}
-
-            </section>
-        {{/each}}
+                            {{#if @root.isCategorical}}
+                                <div class="character-tracker-card__body">
+                                    {{#each this.groups}}
+                                        <section class="character-tracker-group">
+                                            <div class="character-tracker-group__title">
+                                                <h3 class="character-tracker-section-title">{{localize this.title}}</h3>
+                                                <span class="character-tracker-count">{{this.count}}</span>
+                                            </div>
+                                            {{#each this.entities}}
+                                                {{#if this.isSingle}}
+                                                    {{! An entity with one change shows that change directly, with no extra click }}
+                                                    <ul class="character-tracker-log-list character-tracker-log-list--indent">
+                                                        {{#each this.logs}}
+                                                            {{> "modules/character-tracker/templates/log-entry.hbs"}}
+                                                        {{/each}}
+                                                    </ul>
+                                                {{else}}
+                                                    <details class="character-tracker-entity" data-section-key="{{this.key}}" {{#if this.open}}open{{/if}}>
+                                                        <summary class="character-tracker-entity__summary">
+                                                            <i class="character-tracker-icon character-tracker-icon--row character-tracker-chevron chevron" aria-hidden="true"></i>
+                                                            <span class="character-tracker-entity__name">{{this.name}}</span>
+                                                            <span class="character-tracker-count">{{this.count}}</span>
+                                                        </summary>
+                                                        <ul class="character-tracker-log-list character-tracker-log-list--nested">
+                                                            {{#each this.logs}}
+                                                                {{> "modules/character-tracker/templates/log-entry.hbs"}}
+                                                            {{/each}}
+                                                        </ul>
+                                                    </details>
+                                                {{/if}}
+                                            {{/each}}
+                                        </section>
+                                    {{/each}}
+                                </div>
+                            {{else}}
+                                <ul class="character-tracker-log-list character-tracker-card__body">
+                                    {{#each this.logs}}
+                                        {{> "modules/character-tracker/templates/log-entry.hbs"}}
+                                    {{/each}}
+                                </ul>
+                            {{/if}}
+                        </details>
+                    {{else}}
+                        <div class="character-tracker-card">
+                            <p class="character-tracker-empty">{{localize "character-tracker.ui.noLogs"}}</p>
+                        </div>
+                    {{/each}}
+                </div>
+            {{/with}}
+        {{else}}
+            <div class="character-tracker-log">
+                <div class="character-tracker-card">
+                    <p class="character-tracker-empty">{{localize "character-tracker.ui.noPlayers"}}</p>
+                </div>
+            </div>
+        {{/if}}
     </main>
 
 </div>

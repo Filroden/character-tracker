@@ -6,7 +6,7 @@
     "compatibility": { "minimum": "13", "verified": "14.360", "maximum": "14" },
     "authors": [{ "name": "Ken Dearman" }],
     "esmodules": ["main.js"],
-    "styles": ["styles/filroden-theme.css", "styles/character-tracker.css"],
+    "styles": ["styles/character-tracker-theme.css", "styles/character-tracker.css"],
     "languages": [
         { "lang": "en", "name": "English", "path": "languages/en.json" },
         { "lang": "en-GB", "name": "English (UK)", "path": "languages/en-gb.json" }

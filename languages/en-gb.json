@@ -1,1 +1,5 @@
-{}
+{
+    "character-tracker.ui.appearanceTooltip": "Choose the window's accent colour.",
+    "character-tracker.ui.accentColor": "Accent colour",
+    "character-tracker.settings.accent.name": "Accent Colour"
+}

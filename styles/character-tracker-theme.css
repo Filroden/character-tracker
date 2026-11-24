@@ -1,0 +1,244 @@
+/* ===================================================================
+   --- CHARACTER TRACKER THEME ---
+   Design tokens for the Character Tracker window. Every variable is
+   prefixed --character-tracker- and is only ever set on the module's own
+   elements (the window, its tooltips and its dialogues), so nothing here
+   can leak into Foundry's interface or another module.
+
+   Two accent hues (gold and blue), each in a dark and a light mode, give
+   four themes. The hue is the user's choice (a client setting, picked from
+   the Appearance menu in the window). Dark or light follows Foundry's own
+   interface theme: Foundry marks themed applications with .theme-dark or
+   .theme-light, and the body with the interface default. The light rules
+   below match either an explicit .theme-light on the window (or dialogue),
+   or a light body with no explicit .theme-dark on that element, so an application-level
+   choice always wins over the interface default. With neither class the
+   dark values apply.
+
+   Colour values are generated from one recipe and checked for contrast in
+   all four themes (primary text 7:1 on base and panel; other text 4.5:1 on
+   the surfaces it is used on; strong borders, focus ring and fills 3:1).
+   Change them as a set, never one value by hand.
+
+   Roles:
+   --character-tracker-bg-base:               Deepest background: the studio frame behind panels.
+   --character-tracker-bg-panel:              Panels, the inspector, dialogues, the world bar.
+   --character-tracker-bg-raised:             Cards and list rows that sit on a panel; a settlement map's bar.
+   --character-tracker-bg-hover:              Hover on rows, buttons and menu items.
+   --character-tracker-bg-highlight:          The pressed state of quiet controls and the held banner; accent text is not used on it (under 4.5:1 in gold light and blue dark).
+   --character-tracker-bg-selected:           v5. The selected or current thing: a selected row, card or menu item, the current layer, the chosen version; tinted with the secondary accent.
+   --character-tracker-text-primary:          Body text and values.
+   --character-tracker-text-secondary:        Labels beside controls.
+   --character-tracker-text-muted:            Hints, placeholders, disabled text; keeps 4.5:1 on the panel and the selected surface.
+   --character-tracker-text-on-accent:        v5. Text and icons on the accent fill: white, except gold light, where the fill is a bright gold and takes dark text.
+   --character-tracker-border-subtle:         Dividers inside a panel.
+   --character-tracker-border-main:           Field and section borders.
+   --character-tracker-border-strong:         Borders that must be seen: inputs, fieldsets, swatch edges; 3:1 on the panel.
+   --character-tracker-accent-main:           The hue as text and icons: section titles, links, icons in bars and menus; 4.5:1 on the panel and raised surfaces.
+   --character-tracker-accent-hover:          Accent text on hover.
+   --character-tracker-fill-accent:           The hue as a surface: primary buttons, the lit rail tool, the mode switch, a chosen segment, ticks; text-on-accent passes 4.5:1 (gold light: a bright gold with dark text, 8.0:1).
+   --character-tracker-fill-accent-hover:     The accent fill on hover.
+   --character-tracker-fill-accent-edge:      v5. The edge of an accent fill: the fill itself, except gold light (a deeper gold) and blue dark (a lighter blue), so it keeps 3:1 on the panel.
+   --character-tracker-accent-secondary:      v5: one magenta (305°) for both hues. What you are working on: the selection, the current layer, the working state, Go and link marks, the unsaved dot, the chosen version. Never structure or decoration.
+   --character-tracker-border-focus:          Focus-visible ring on every control, 2px outside the border.
+   --character-tracker-color-warning:         Warning text and icons: the marks that need action (Out of date, Refresh from surface) and the action notice.
+   --character-tracker-color-danger:          Danger text and icons: destructive menu items, Delete.
+   --character-tracker-fill-negative:         Delete, Discard; Delete's hover and focus.
+   --character-tracker-badge-bg:              Cost badges and counts.
+   --character-tracker-badge-text:            Text on badges.
+=================================================================== */
+
+/* --- Vendored typefaces (SIL Open Font License 1.1, see fonts/) ---
+   The families carry a module prefix so they cannot clash with another
+   module that ships a different cut or subset of the same face. */
+@font-face {
+    font-family: "Character Tracker Atkinson Hyperlegible";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Character Tracker Atkinson Hyperlegible";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("../fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Character Tracker Sora";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url("../fonts/sora-latin-600-normal.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Character Tracker Barlow Semi Condensed";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("../fonts/barlow-semi-condensed-latin-500-normal.woff2") format("woff2");
+}
+
+/* --- Tokens shared by every theme --- */
+.character-tracker-accent--gold,
+.character-tracker-accent--blue {
+    /* Interface text: labels, rows, buttons and section titles */
+    --character-tracker-font-ui: "Character Tracker Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+    /* Titles: the player's name, character names, dialogue titles */
+    --character-tracker-font-display: "Character Tracker Sora", "Character Tracker Atkinson Hyperlegible", system-ui, sans-serif;
+    /* Numbers: times, counts and changed values, with tabular figures so they line up */
+    --character-tracker-font-readout: "Character Tracker Barlow Semi Condensed", "Character Tracker Atkinson Hyperlegible", system-ui, sans-serif;
+
+    /* Text sizes. 0.6875rem is the floor, used only for marks and tags */
+    --character-tracker-text-xs: 0.6875rem;
+    --character-tracker-text-s: 0.75rem;
+    --character-tracker-text-m: 0.8125rem;
+    --character-tracker-text-l: 0.875rem;
+    --character-tracker-text-xl: 1rem;
+
+    /* Spacing steps */
+    --character-tracker-space-1: 0.25rem;
+    --character-tracker-space-2: 0.5rem;
+    --character-tracker-space-3: 0.75rem;
+    --character-tracker-space-4: 1rem;
+    --character-tracker-space-6: 1.5rem;
+
+    /* Control and row heights (raised on a coarse pointer, see character-tracker.css) */
+    --character-tracker-control-height: 1.75rem;
+    --character-tracker-row-height: 1.875rem;
+
+    /* Radii and strokes stay in px so they remain crisp at every UI scale */
+    --character-tracker-radius-small: 3px;
+    --character-tracker-radius-medium: 6px;
+    --character-tracker-radius-large: 10px;
+    --character-tracker-selection-bar: 3px;
+    --character-tracker-shadow-popout: -4px 0 16px rgba(0, 0, 0, 0.45);
+
+    /* 1 in left-to-right layouts, -1 in right-to-left ones; flips directional icons */
+    --character-tracker-dir-flip: 1;
+}
+
+
+/* --- Gold, dark --- */
+.character-tracker-accent--gold {
+    --character-tracker-bg-base: #1b1913;
+    --character-tracker-bg-panel: #27251b;
+    --character-tracker-bg-raised: #333024;
+    --character-tracker-bg-hover: #423e2e;
+    --character-tracker-bg-highlight: #554d30;
+    --character-tracker-bg-selected: #482e45;
+    --character-tracker-text-primary: #f1efea;
+    --character-tracker-text-secondary: #cfccbf;
+    --character-tracker-text-muted: #aca99a;
+    --character-tracker-text-on-accent: #ffffff;
+    --character-tracker-border-subtle: #363326;
+    --character-tracker-border-main: #514c38;
+    --character-tracker-border-strong: #837954;
+    --character-tracker-accent-main: #dac262;
+    --character-tracker-accent-hover: #e5d180;
+    --character-tracker-fill-accent: #867327;
+    --character-tracker-fill-accent-hover: #796720;
+    --character-tracker-fill-accent-edge: #867327;
+    --character-tracker-accent-secondary: #f0a8ea;
+    --character-tracker-border-focus: #e5cd6c;
+    --character-tracker-color-warning: #f0a242;
+    --character-tracker-color-danger: #ef756c;
+    --character-tracker-fill-negative: #a33129;
+    --character-tracker-badge-bg: #403b26;
+    --character-tracker-badge-text: #e2d18d;
+}
+
+/* --- Blue, dark --- */
+.character-tracker-accent--blue {
+    --character-tracker-bg-base: #13181b;
+    --character-tracker-bg-panel: #1b2227;
+    --character-tracker-bg-raised: #242d33;
+    --character-tracker-bg-hover: #2e3a42;
+    --character-tracker-bg-highlight: #304555;
+    --character-tracker-bg-selected: #482e45;
+    --character-tracker-text-primary: #eaeef1;
+    --character-tracker-text-secondary: #bfc8cf;
+    --character-tracker-text-muted: #9aa5ac;
+    --character-tracker-text-on-accent: #ffffff;
+    --character-tracker-border-subtle: #262f36;
+    --character-tracker-border-main: #384751;
+    --character-tracker-border-strong: #546f83;
+    --character-tracker-accent-main: #5aa4d8;
+    --character-tracker-accent-hover: #78b6e3;
+    --character-tracker-fill-accent: #29648e;
+    --character-tracker-fill-accent-hover: #225981;
+    --character-tracker-fill-accent-edge: #3b91ce;
+    --character-tracker-accent-secondary: #f0a8ea;
+    --character-tracker-border-focus: #6cb2e5;
+    --character-tracker-color-warning: #f0a242;
+    --character-tracker-color-danger: #ef756c;
+    --character-tracker-fill-negative: #a33129;
+    --character-tracker-badge-bg: #263540;
+    --character-tracker-badge-text: #8dbfe2;
+}
+
+/* --- Gold, light --- */
+:is(.character-tracker-window, .character-tracker-dialog).theme-light.character-tracker-accent--gold,
+.theme-light :is(.character-tracker-window, .character-tracker-dialog):not(.theme-dark).character-tracker-accent--gold,
+body.theme-light #tooltip.character-tracker-accent--gold {
+    --character-tracker-bg-base: #f6f5ee;
+    --character-tracker-bg-panel: #ffffff;
+    --character-tracker-bg-raised: #faf9f5;
+    --character-tracker-bg-hover: #efece1;
+    --character-tracker-bg-highlight: #eae4cd;
+    --character-tracker-bg-selected: #faeff9;
+    --character-tracker-text-primary: #262317;
+    --character-tracker-text-secondary: #4e4936;
+    --character-tracker-text-muted: #726d5a;
+    --character-tracker-text-on-accent: #262317;
+    --character-tracker-border-subtle: #ebe9e0;
+    --character-tracker-border-main: #d6d2c2;
+    --character-tracker-border-strong: #9d936c;
+    --character-tracker-accent-main: #7a681f;
+    --character-tracker-accent-hover: #635417;
+    --character-tracker-fill-accent: #ddb42c;
+    --character-tracker-fill-accent-hover: #cca41e;
+    --character-tracker-fill-accent-edge: #ad8c1f;
+    --character-tracker-accent-secondary: #842e7d;
+    --character-tracker-border-focus: #a08722;
+    --character-tracker-color-warning: #9f5904;
+    --character-tracker-color-danger: #bb251b;
+    --character-tracker-fill-negative: #b93127;
+    --character-tracker-badge-bg: #eeebdd;
+    --character-tracker-badge-text: #6a5a1b;
+}
+
+/* --- Blue, light --- */
+:is(.character-tracker-window, .character-tracker-dialog).theme-light.character-tracker-accent--blue,
+.theme-light :is(.character-tracker-window, .character-tracker-dialog):not(.theme-dark).character-tracker-accent--blue,
+body.theme-light #tooltip.character-tracker-accent--blue {
+    --character-tracker-bg-base: #eef3f6;
+    --character-tracker-bg-panel: #ffffff;
+    --character-tracker-bg-raised: #f5f8fa;
+    --character-tracker-bg-hover: #e1e9ef;
+    --character-tracker-bg-highlight: #cddeea;
+    --character-tracker-bg-selected: #faeff9;
+    --character-tracker-text-primary: #172026;
+    --character-tracker-text-secondary: #36444e;
+    --character-tracker-text-muted: #5a6872;
+    --character-tracker-text-on-accent: #ffffff;
+    --character-tracker-border-subtle: #e0e6eb;
+    --character-tracker-border-main: #c2ced6;
+    --character-tracker-border-strong: #6c899d;
+    --character-tracker-accent-main: #256593;
+    --character-tracker-accent-hover: #1d547c;
+    --character-tracker-fill-accent: #276591;
+    --character-tracker-fill-accent-hover: #20577e;
+    --character-tracker-fill-accent-edge: #276591;
+    --character-tracker-accent-secondary: #842e7d;
+    --character-tracker-border-focus: #2577b1;
+    --character-tracker-color-warning: #9f5904;
+    --character-tracker-color-danger: #bb251b;
+    --character-tracker-fill-negative: #b93127;
+    --character-tracker-badge-bg: #dde7ee;
+    --character-tracker-badge-text: #1b496a;
+}

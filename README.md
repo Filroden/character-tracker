@@ -30,14 +30,13 @@ The module tracks:
 
    ![Character Tracker View Button](https://github.com/Filroden/character-tracker/blob/main/screenshots/character-tracker-view-button.png)
 
-2. **Navigation**:
-   - The left panel displays a list of active players (and GMs, if tracking is enabled). Click a name to jump to their specific logs.
-   - The right panel displays the audit log, nested by player and then by their individual characters. A high-level statistics summary is shown first, followed by a detailed chronological log that can be expanded or collapsed.
-3. **Saving the Log**: You can export individual logs for each player by clicking the `Download` button next to their name.
-4. **Switching the View**: You can switch between a chronological view (ideal for showing what was changing at the same time) and a categorical view (much easier to see what is being changed) by clicking the `Toggle View Mode` button at the bottom of the left panel. The categorical view groups changes by type (items, active effects and core data changes), and then further groups the changes by the specific item, effect or data being changed.
-5. **Refresh the Tracker**: You can see new changes in the interface without closing the window by clicking the `Refresh` button at the bottom of the left panel.
-6. **Clearing the Log**: You can wipe all logs globally (via the `Delete` button at the bottom of the left panel) or clear individual player logs (via the `Delete` button next to their name).
-7. **Spotting Changes Made With No GM Online**: Entries that were recorded while no GM was logged in show a `No GM` badge beside the action. Hover over the badge for an explanation. The badge also appears in exported logs.
+2. **Choosing a player**: The panel on the left lists every player (and GMs, if `Track GM Changes` is on), with the number of changes logged for each. Click a name to show that player's log. Players with nothing logged are shown in a quieter colour.
+3. **Reading the log**: The bar above the log shows the player's name, how many changes they have made and when they last made one. Below it, each of the player's characters has its own card, which you can open or close. The first card starts open, and the window remembers which cards you opened or closed while it stays open.
+4. **Switching the view**: Use `Timeline` and `By category` in the bar above the log. The timeline lists every change, newest first (ideal for seeing what was changing at the same time). The categorical view groups changes by type (core data, items and active effects), and then by the specific stat, item or effect, so you can follow the history of one thing. A stat, item or effect with a single change shows that change directly.
+5. **Reverted changes**: When a player makes a change and later undoes it themselves (such as adding an effect and then removing it), the pair is folded into one dashed line. Turn on `Expand reverted changes` to see every original entry, faded and marked `Reverted`. Nothing is ever removed from the log or from exports.
+6. **Spotting changes made with no GM online**: Entries recorded while no GM was logged in carry a `No GM` mark beside the action. Hover over the mark for an explanation. The mark also appears in exported logs.
+7. **Saving, refreshing and clearing**: The buttons at the end of the bar above the log refresh the window, export the player's log to a text file, and clear the player's log. `Clear all logs…` at the foot of the player list deletes every player's log. Both clear buttons ask you to confirm first, and the confirming button names exactly what will be deleted.
+8. **Appearance**: The palette button beside `Players` chooses the window's accent colour (gold or blue). Each user's choice is saved for them alone. Light or dark follows Foundry's own interface theme.
 
 ### Settings
 
@@ -73,6 +72,21 @@ Recording with no GM online is controlled by the `Record Changes When No GM Is O
 Whilst the module works with any system, system-specific dictionaries can be added to convert standard dot-notation database keys (e.g., `system.health.hp.value`) into more easily readable text (e.g., `Hit Points`). If the game system provides its own localisation files, the tracker maps to these keys, making sure it can translate into any language supported by the system.
 
 For the initial release, a simple dictionary has been included for the Rolemaster Unified (RMU) system as an example.
+
+## Licences
+
+Character Tracker is released under the [MIT Licence](https://mit-license.org/).
+
+It includes the following third-party assets, each kept with its licence in the repository:
+
+| Asset | Copyright | Licence | Location |
+| :--- | :--- | :--- | :--- |
+| [Atkinson Hyperlegible](https://www.brailleinstitute.org/freefont/) typeface | Braille Institute of America, Inc. | [SIL Open Font License 1.1](fonts/LICENSE-atkinson-hyperlegible.txt) | `fonts/` |
+| [Sora](https://github.com/sora-xor/sora-font) typeface | The Sora Project Authors | [SIL Open Font License 1.1](fonts/LICENSE-sora.txt) | `fonts/` |
+| [Barlow Semi Condensed](https://github.com/jpt/barlow) typeface | The Barlow Project Authors | [SIL Open Font License 1.1](fonts/LICENSE-barlow-semi-condensed.txt) | `fonts/` |
+| [Material icons](https://fonts.google.com/icons) | Google | [Apache Licence 2.0](icons/icons-licence.md) | `icons/` |
+
+The typefaces are included as Latin subsets in WOFF2 format, and are used only inside the Character Tracker window.
 
 ## Roadmap
 

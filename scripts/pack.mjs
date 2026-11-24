@@ -9,9 +9,9 @@ if (fs.existsSync('./dist')) {
 copyFiles(
   '.',
   './dist',
-  ['js', 'json', 'css', 'hbs', 'svg', 'md', 'html'],
+  ['js', 'json', 'css', 'hbs', 'svg', 'md', 'html', 'woff2', 'txt'],
   [],
-  ['dist', 'node_modules', '.git', '.github', 'scripts'],
+  ['dist', 'node_modules', '.git', '.github', 'scripts', 'design'],
   ['package.json', 'package-lock.json', 'GEMINI.md', '.DS_Store', '.gitignore', '.gitattributes']
 )  
 .then(() => {

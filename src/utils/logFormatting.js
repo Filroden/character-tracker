@@ -32,6 +32,17 @@ export const CHANGE_KEYS = {
 const SPECIAL_LABELS = {
     [CHANGE_KEYS.NAME]: "Name",
     [CHANGE_KEYS.TOKEN]: "Token Settings Modified",
+    // Active effect fields (see TRACKED_FIELDS in documentWatchers.js)
+    disabled: "Disabled",
+    changes: "Changes",
+    "system.changes": "Changes",
+    statuses: "Statuses",
+    "duration.value": "Duration",
+    "duration.units": "Duration Units",
+    "duration.expiry": "Duration Expiry",
+    "duration.seconds": "Duration (Seconds)",
+    "duration.rounds": "Duration (Rounds)",
+    "duration.turns": "Duration (Turns)",
 };
 
 /**
