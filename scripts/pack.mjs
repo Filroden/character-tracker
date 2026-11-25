@@ -12,7 +12,7 @@ copyFiles(
   ['js', 'json', 'css', 'hbs', 'svg', 'md', 'html', 'woff2', 'txt'],
   [],
   ['dist', 'node_modules', '.git', '.github', 'scripts', 'design'],
-  ['package.json', 'package-lock.json', 'GEMINI.md', '.DS_Store', '.gitignore', '.gitattributes']
+  ['package.json', 'eslint.config.js', 'package-lock.json', '.DS_Store', '.gitignore', '.gitattributes']
 )  
 .then(() => {
   console.log('File copy operation completed successfully!');

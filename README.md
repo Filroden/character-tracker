@@ -71,7 +71,7 @@ Recording with no GM online is controlled by the `Record Changes When No GM Is O
 
 Whilst the module works with any system, system-specific dictionaries can be added to convert standard dot-notation database keys (e.g., `system.health.hp.value`) into more easily readable text (e.g., `Hit Points`). If the game system provides its own localisation files, the tracker maps to these keys, making sure it can translate into any language supported by the system.
 
-For the initial release, a simple dictionary has been included for the Rolemaster Unified (RMU) system as an example.
+An example dictionary is included for the Rolemaster Unified (RMU) system.
 
 ## Licences
 

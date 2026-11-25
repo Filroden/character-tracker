@@ -5,7 +5,6 @@
 import { StateManager } from "../data/StateManager.js";
 import { PendingLogQueue, isInternalUpdate } from "../data/PendingLogQueue.js";
 import { MODULE_ID, SETTING_KEYS } from "../config/settings.js";
-import { SystemMapper } from "../systems/SystemMapper.js";
 import { CHANGE_KEYS, CHANGE_SEPARATOR, formatChange } from "../utils/logFormatting.js";
 
 /**
