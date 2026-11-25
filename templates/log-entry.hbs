@@ -1,0 +1,49 @@
+{{!
+    One log line, shared by the timeline and every group in the categorical view.
+    Three shapes:
+      - a summary line (isRevertSummary) standing in for changes that were later undone
+      - a normal entry, faded when it was reverted (isReverted, only seen with reverted changes expanded)
+      - a data entry listing one line per changed value (detailParts), where only the undone
+        changes are faded when the entry is partly reverted
+    The time sits in its own column in the readout face, so times line up down the list.
+}}
+<li class="character-tracker-entry{{#if this.isRevertSummary}} character-tracker-entry--summary{{/if}}{{#if this.isReverted}} character-tracker-entry--reverted{{/if}}">
+    <span class="character-tracker-entry__time character-tracker-readout">{{timeSince this.timestamp}}</span>
+
+    <div class="character-tracker-entry__head">
+        <span class="character-tracker-entry__action">{{this.actionLabel}}</span>
+        {{#if this.recordedWithoutGM}}
+            <span
+                class="character-tracker-mark character-tracker-mark--no-gm"
+                data-tooltip="{{localize 'character-tracker.ui.recordedWithoutGMTooltip'}}"
+                data-tooltip-class="{{@root.tooltipClass}}"
+            >
+                <i class="character-tracker-icon character-tracker-icon--mark warning" aria-hidden="true"></i>
+                {{localize "character-tracker.ui.recordedWithoutGM"}}
+            </span>
+        {{/if}}
+        {{#if this.isReverted}}
+            <span
+                class="character-tracker-mark character-tracker-mark--reverted"
+                data-tooltip="{{localize 'character-tracker.ui.revertedBadgeTooltip'}}"
+                data-tooltip-class="{{@root.tooltipClass}}"
+            >
+                <i class="character-tracker-icon character-tracker-icon--mark undo" aria-hidden="true"></i>
+                {{localize "character-tracker.ui.revertedBadge"}}
+            </span>
+        {{/if}}
+    </div>
+
+    <div class="character-tracker-entry__detail">
+        {{#if this.detailParts}}
+            {{#each this.detailParts}}
+                <span class="character-tracker-entry__part{{#if this.reverted}} character-tracker-entry__part--reverted{{/if}}">
+                    {{this.label}}
+                    {{#if this.value}}<span class="character-tracker-readout character-tracker-entry__value">{{this.value}}</span>{{/if}}
+                </span>
+            {{/each}}
+        {{else}}
+            {{this.detail}}
+        {{/if}}
+    </div>
+</li>

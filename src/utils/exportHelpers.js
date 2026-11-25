@@ -39,7 +39,8 @@ function formatLogsForExport(logs, playerName) {
 
     const formattedEntries = logs.map((log) => {
         const time = new Date(log.timestamp).toLocaleString();
-        return `[${time}] ${log.actorName}\nAction: ${log.action}\nDetails: ${log.detail}\n`;
+        const marker = log.recordedWithoutGM ? ` (${game.i18n.localize("character-tracker.ui.recordedWithoutGM")})` : "";
+        return `[${time}] ${log.actorName}\nAction: ${log.action}${marker}\nDetails: ${log.detail}\n`;
     });
 
     return content + formattedEntries.join("\n");

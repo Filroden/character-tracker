@@ -1,15 +1,30 @@
 /* ===================================================================
-   --- MATERIAL DESIGN ICONS ---
+   --- CHARACTER TRACKER ---
+   Builds the window from the tokens in character-tracker-theme.css.
+   Every class is the module's own (character-tracker- blocks, BEM
+   elements and modifiers) and no Foundry class is styled except the
+   window's own content area, so neither Foundry nor another module can
+   reach in. States use ARIA attributes (aria-current, aria-checked,
+   aria-pressed, aria-expanded) rather than state classes wherever one
+   exists, so the styling and the accessibility tree cannot disagree.
+
+   Lengths: text, spacing and containers in rem, so the window follows
+   Foundry's UI scale; strokes, radii and shadows in px, so they stay
+   crisp. Logical properties throughout, so right-to-left layouts mirror.
+=================================================================== */
+
+/* ===================================================================
+   --- ICONS ---
+   Material icons drawn as CSS masks in currentColor, so each icon takes
+   the colour of the text around it.
 =================================================================== */
 .character-tracker-icon {
     display: inline-block;
-    width: var(--filroden-font-size-l); 
-    height: var(--filroden-font-size-l);
-    min-width: var(--filroden-font-size-l);
+    flex: 0 0 auto;
+    width: 1.25rem;
+    height: 1.25rem;
     background-color: currentColor;
     background-image: none !important;
-    content: "";
-    transform: scaleX(var(--filroden-dir-flip));
     -webkit-mask-size: 100% 100%;
     mask-size: 100% 100%;
     -webkit-mask-repeat: no-repeat;
@@ -19,462 +34,832 @@
     margin: 0;
 }
 
-.character-tracker-icon.list     { -webkit-mask-image: url('../icons/fact_check.svg'); mask-image: url('../icons/fact_check.svg'); }
-.character-tracker-icon.person   { -webkit-mask-image: url('../icons/person.svg'); mask-image: url('../icons/person.svg'); }
-.character-tracker-icon.delete   { -webkit-mask-image: url('../icons/delete.svg'); mask-image: url('../icons/delete.svg'); }
-.character-tracker-icon.download { -webkit-mask-image: url('../icons/download.svg'); mask-image: url('../icons/download.svg'); }
-.character-tracker-icon.refresh { -webkit-mask-image: url('../icons/refresh.svg'); mask-image: url('../icons/refresh.svg'); }
-.character-tracker-icon.filter { -webkit-mask-image: url('../icons/event_list.svg'); mask-image: url('../icons/event_list.svg'); }
+.character-tracker-icon--row { width: 1rem; height: 1rem; }
+.character-tracker-icon--mark { width: 0.75rem; height: 0.75rem; }
+
+.character-tracker-icon.list     { -webkit-mask-image: url("../icons/fact_check.svg"); mask-image: url("../icons/fact_check.svg"); }
+.character-tracker-icon.person   { -webkit-mask-image: url("../icons/person.svg"); mask-image: url("../icons/person.svg"); }
+.character-tracker-icon.delete   { -webkit-mask-image: url("../icons/delete.svg"); mask-image: url("../icons/delete.svg"); }
+.character-tracker-icon.download { -webkit-mask-image: url("../icons/download.svg"); mask-image: url("../icons/download.svg"); }
+.character-tracker-icon.refresh  { -webkit-mask-image: url("../icons/refresh.svg"); mask-image: url("../icons/refresh.svg"); }
+.character-tracker-icon.undo     { -webkit-mask-image: url("../icons/undo.svg"); mask-image: url("../icons/undo.svg"); }
+.character-tracker-icon.chevron  { -webkit-mask-image: url("../icons/chevron_right.svg"); mask-image: url("../icons/chevron_right.svg"); }
+.character-tracker-icon.warning  { -webkit-mask-image: url("../icons/warning.svg"); mask-image: url("../icons/warning.svg"); }
+.character-tracker-icon.palette  { -webkit-mask-image: url("../icons/palette.svg"); mask-image: url("../icons/palette.svg"); }
 
 /* ===================================================================
-   --- ACTOR SIDEBAR ---
+   --- ACTOR SIDEBAR BUTTON ---
+   Sits in Foundry's own directory header, so it keeps Foundry's button
+   styling and only sizes its icon.
 =================================================================== */
-
 .character-tracker-sidebar-btn {
     flex: 0.25;
 }
 
-/* ===================================================================
-   --- APPLICATION SCROLLBARS ---
-=================================================================== */
-
-.character-tracker-window * {
-    scrollbar-width: auto !important;
-    scrollbar-color: auto !important;
-}
-
-.character-tracker-window .character-tracker-window-scrollable::-webkit-scrollbar {
-    width: 8px !important;
-    height: 8px !important;
-}
-
-.character-tracker-window .character-tracker-window-scrollable::-webkit-scrollbar-track {
-    background: var(--filroden-color-bg-hover-solid) !important;
-    border-radius: var(--filroden-radius-large) !important;
-}
-
-.character-tracker-window .character-tracker-window-scrollable::-webkit-scrollbar-thumb {
-    background-color: var(--filroden-color-text-accent) !important;
-    border-radius: var(--filroden-radius-large) !important;
-    border: 1px solid rgba(0, 0, 0, 0.6) !important;
-}
-
-.character-tracker-window .character-tracker-window-scrollable::-webkit-scrollbar-thumb:hover {
-    background-color: var(--filroden-color-text-accent-hover) !important;
-}
-
-.character-tracker-window .character-tracker-window-scrollable::-webkit-scrollbar-button {
-    display: none;
+.character-tracker-sidebar-btn .character-tracker-icon {
+    width: 1.125rem;
+    height: 1.125rem;
 }
 
 /* ===================================================================
    --- TOOLTIPS ---
+   Foundry's tooltip element lives outside the window, so it carries the
+   accent class itself (see tooltipClass in AuditLogApp.js) to pick up the
+   same tokens.
 =================================================================== */
-
 #tooltip.character-tracker-tooltip {
-    max-width: 300px !important;
-    border: 1px solid var(--filroden-color-text-accent);
-    border-radius: var(--filroden-radius-small);
-    padding: var(--filroden-space-s);
-    background: var(--filroden-color-bg-darkest);
-    color: var(--filroden-color-text-main-solid);
-    box-shadow: var(--filroden-shadow-popout);
-    font-family: var(--filroden-font-family);
-    font-size: var(--filroden-font-size-s);
-    line-height: 1.4;
+    max-width: 18rem;
+    padding: var(--character-tracker-space-2) var(--character-tracker-space-3);
+    border: 1px solid var(--character-tracker-border-strong);
+    border-radius: var(--character-tracker-radius-medium);
+    background: var(--character-tracker-bg-panel);
+    color: var(--character-tracker-text-primary);
+    box-shadow: var(--character-tracker-shadow-popout);
+    font-family: var(--character-tracker-font-ui);
+    font-size: var(--character-tracker-text-s);
+    line-height: 1rem;
     text-align: start;
-    z-index: var(--z-index-tooltip, 9999);
-    margin-top: var(--filroden-space-m);
 }
 
 /* ===================================================================
-   --- APPLICATION LAYOUT ---
+   --- WINDOW ---
+   Foundry supplies the frame (title bar and controls); only the content
+   area is styled.
 =================================================================== */
-
 .character-tracker-window {
-    font-family: var(--filroden-font-family) !important;
-    font-size: var(--filroden-font-size-s);
-    --filroden-dir-flip: 1;
+    font-family: var(--character-tracker-font-ui);
+    font-size: var(--character-tracker-text-m);
+    line-height: 1.125rem;
 }
 
 .character-tracker-window.rtl {
-    --filroden-dir-flip: -1;
-}
-
-.character-tracker-window .window-header {
-    background: var(--filroden-color-bg-darkest) !important;
-    border: none !important;
-    color: var(--filroden-color-text-main-solid);
-    flex: 0 0 auto !important; 
-    min-height: 34px; 
-    height: auto !important;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.character-tracker-window .window-header .window-title {
-    font-size: var(--filroden-font-size-s);
-    line-height: 1.2;
-    text-align: start; 
-    padding-inline-start: var(--filroden-space-s);
-    padding-inline-end: 0;
-    flex: 1;
-}
-
-.character-tracker-window .window-header .window-icon {
-    margin-inline-start: var(--filroden-space-xxs);
-    margin-inline-end: 0;
+    --character-tracker-dir-flip: -1;
 }
 
 .character-tracker-window .window-content {
     padding: 0;
     overflow: hidden;
-    background-color: var(--filroden-color-bg-darkest);
-    color: var(--filroden-color-text-main);
-    font-family: var(--filroden-font-family);
+    background: var(--character-tracker-bg-base);
+    color: var(--character-tracker-text-primary);
 }
 
-.character-tracker-window .character-tracker-layout {
+.character-tracker-window :focus-visible {
+    outline: 2px solid var(--character-tracker-border-focus);
+    outline-offset: 2px;
+}
+
+.character-tracker-layout {
     display: flex;
     height: 100%;
     width: 100%;
+    min-height: 0;
+    /* Lets the log and the player list respond to the window's width, not the screen's */
+    container-type: inline-size;
+    container-name: character-tracker-layout;
 }
 
-/* --- SIDEBAR --- */
-.character-tracker-window .character-tracker-sidebar {
-    width: 12.5rem; /* ~200px */
-    display: flex;
-    flex-direction: column;
-    padding: var(--filroden-space-m);
-    gap: var(--filroden-space-m);
-    background-color: var(--filroden-color-bg-darkest);
-    border-inline-end: 1px solid var(--filroden-color-border);
-}
-
-.character-tracker-window .character-tracker-sidebar-header {
-    border-bottom: 2px solid var(--filroden-color-text-accent);
-    font-family: var(--font-primary);
-    font-size: var(--filroden-font-size-m);
-    font-weight: var(--filroden-font-weight-bold);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--filroden-color-text-main-solid);
-    margin-block-end: var(--filroden-space-s);
-    padding-block-end: var(--filroden-space-xs);
-    line-height: 1;
-}
-
-.character-tracker-window .character-tracker-nav {
-    flex: 1;
-    overflow-y: auto;
-    padding: var(--filroden-space-m);
-    display: flex;
-    flex-direction: column;
-    gap: var(--filroden-space-xs);
-}
-
-.character-tracker-window .character-tracker-nav-link {
-    display: flex;
-    align-items: center;
-    gap: var(--filroden-space-s);
-    color: var(--filroden-color-text-main);
-    text-decoration: none;
-    border-radius: var(--filroden-radius-small);
-    transition: background-color 0.2s ease;
-    width: 100%;
-    background: transparent;
+/* ===================================================================
+   --- SHARED PIECES ---
+=================================================================== */
+.character-tracker-section-title {
+    margin: 0;
+    padding: 0;
     border: none;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: inherit;
-    text-align: start;
-    justify-content: start;
-}
-
-.character-tracker-window .character-tracker-nav-link:hover {
-    background-color: var(--filroden-color-bg-hover);
-    color: var(--filroden-color-text-accent-hover);
-    text-shadow: var(--filroden-shadow-text);
-}
-
-.character-tracker-window .character-tracker-global-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--filroden-space-s);
-    padding-block-start: var(--filroden-space-l);
-    border-block-start: 1px solid var(--filroden-color-text-accent);
-}
-
-/* --- MAIN CONTENT --- */
-.character-tracker-window .character-tracker-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: var(--filroden-space-l);
-    scroll-behavior: smooth;
-}
-
-.character-tracker-window .character-tracker-player-section {
-    margin-block-end: var(--filroden-space-l);
-    padding-block-end: var(--filroden-space-l);
-    border-block-end: var(--filroden-border-dashed);
-}
-
-.character-tracker-window .character-tracker-player-section:last-child {
-    border-block-end: none;
-    margin-block-end: 0;
-}
-
-.character-tracker-window .character-tracker-player-header {
-    position: sticky;
-    top: 0;
-    z-index: 200;
-    background: var(--filroden-color-bg-darkest);
-    padding: var(--filroden-space-xs) 0;
-    margin: 0 0 var(--filroden-space-s) 0;
-    border-radius: var(--filroden-radius-small);
-    border-bottom: 2px solid var(--filroden-color-text-accent);
-    color: var(--filroden-color-text-accent);
-    font-size: var(--filroden-font-size-s);
-    font-weight: var(--filroden-font-weight-bold);
+    font-family: var(--character-tracker-font-ui);
+    font-size: var(--character-tracker-text-s);
+    line-height: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 3rem;
-    gap: var(--filroden-space-s);
-    box-shadow: var(--filroden-shadow-popout);
+    color: var(--character-tracker-accent-main);
 }
 
-.character-tracker-window .character-tracker-player-title {
-    margin: 0;
-    font-size: var(--filroden-font-size-s);
-    font-weight: var(--filroden-font-weight-bold);
-    color: var(--filroden-color-text-accent);
-    display: flex;
-    align-items: center;
-    gap: var(--filroden-space-s);
-}
-
-.character-tracker-window .character-tracker-player-actions {
-    display: flex;
-    gap: var(--filroden-space-s);
-}
-
-/* --- LOG ENTRIES --- */
-.character-tracker-window .character-tracker-log-list {
-    list-style: none;
+.character-tracker-panel-title {
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--filroden-space-s);
+    border: none;
+    font-family: var(--character-tracker-font-display);
+    font-size: var(--character-tracker-text-xl);
+    line-height: 1.25rem;
+    font-weight: 600;
+    color: var(--character-tracker-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.character-tracker-window .character-tracker-log-entry {
-    background-color: var(--filroden-color-bg-light);
-    border-radius: var(--filroden-radius-medium);
-    padding: var(--filroden-space-s) var(--filroden-space-m);
-    box-shadow: var(--filroden-shadow-card);
-    border: var(--filroden-border-dark);
+.character-tracker-readout {
+    font-family: var(--character-tracker-font-readout);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
 }
 
-.character-tracker-window .log {
-    display: flex;
-    align-items: baseline;
-    gap: var(--filroden-space-s);
-    margin-block-end: var(--filroden-space-xxs);
-    font-size: var(--filroden-font-size-s);
-}
-
-.character-tracker-window .log-time {
-    color: var(--filroden-color-text-muted);
-    font-size: var(--filroden-font-size-xs);
-}
-
-.character-tracker-window .log-actor {
-    font-weight: var(--filroden-font-weight-bold);
-    color: var(--filroden-color-text-muted);
-}
-
-.character-tracker-window .log-action {
-    font-weight: var(--filroden-font-weight-bold);
-    color: var(--filroden-color-text-accent);
-    text-transform: uppercase;
-}
-
-.character-tracker-window .log-detail-text {
-    color: var(--filroden-color-text-main-solid);
-}
-
-.character-tracker-window .character-tracker-empty {
+/* A count badge: information, never a control */
+.character-tracker-count {
+    flex: 0 0 auto;
+    min-width: 1.5rem;
+    padding: 0 0.375rem;
+    border-radius: var(--character-tracker-radius-small);
+    background: var(--character-tracker-badge-bg);
+    color: var(--character-tracker-badge-text);
+    font-family: var(--character-tracker-font-readout);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    font-size: var(--character-tracker-text-s);
+    line-height: 1.125rem;
     text-align: center;
-    color: var(--filroden-color-text-placeholder);
-    font-style: italic;
-    padding: var(--filroden-space-l);
-    background-color: var(--filroden-color-bg-light);
-    border-radius: var(--filroden-radius-medium);
 }
 
-/* --- BUTTON STYLES --- */
-.character-tracker-window button {
-    background: var(--filroden-color-bg-light-solid);
-    border: 1px solid var(--filroden-color-border);
-    color: var(--filroden-color-text-main-solid);
-    border-radius: var(--filroden-radius-small);
-    cursor: pointer;
-    padding: 0;
-    transition: all 0.1s ease;
+.character-tracker-tag {
+    flex: 0 0 auto;
+    padding: 0 var(--character-tracker-space-1);
+    border: 1px solid var(--character-tracker-border-strong);
+    border-radius: var(--character-tracker-radius-small);
+    color: var(--character-tracker-text-secondary);
+    font-size: var(--character-tracker-text-xs);
+    line-height: 0.875rem;
 }
 
-.character-tracker-window button:hover {
-    background: var(--filroden-color-bg-hover-solid);
-    border-color: var(--filroden-color-text-accent);
-    box-shadow: none;
+.character-tracker-empty {
+    margin: 0;
+    padding: var(--character-tracker-space-4) var(--character-tracker-space-3);
+    color: var(--character-tracker-text-muted);
+    font-size: var(--character-tracker-text-s);
+    line-height: 1rem;
 }
 
-.character-tracker-window *:focus-visible,
-.character-tracker-window button:focus {
-    outline: 2px solid var(--filroden-color-text-accent);
-    border-radius: var(--filroden-radius-small);
-}
-
+/* ===================================================================
+   --- BUTTONS ---
+=================================================================== */
 .character-tracker-window .character-tracker-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-family: inherit;
-    font-size: var(--filroden-font-size-s);
-    font-weight: var(--filroden-font-weight-bold);
-    gap: var(--filroden-space-s);
-    padding: var(--filroden-space-s) var(--filroden-space-m);
+    gap: 0.375rem;
+    width: auto;
+    height: var(--character-tracker-control-height);
+    min-height: 0;
+    margin: 0;
+    padding: 0 0.625rem;
+    border: 1px solid var(--character-tracker-border-strong);
+    border-radius: var(--character-tracker-radius-medium);
+    background: var(--character-tracker-bg-raised);
+    color: var(--character-tracker-text-primary);
+    box-shadow: none;
+    font-family: var(--character-tracker-font-ui);
+    font-size: var(--character-tracker-text-m);
+    line-height: 1rem;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
 }
 
 .character-tracker-window .character-tracker-btn:hover {
-    background: var(--filroden-color-bg-hover-solid);
-    border-color: var(--filroden-color-text-accent);
-    color: var(--filroden-color-text-main-solid);
+    background: var(--character-tracker-bg-hover);
+    box-shadow: none;
 }
 
-.character-tracker-window .character-tracker-btn.danger {
-    color: var(--filroden-color-danger);
-    width: 100%;
+.character-tracker-window .character-tracker-btn:active {
+    background: var(--character-tracker-bg-highlight);
 }
 
-.character-tracker-window .character-tracker-btn.danger:hover {
-    color: var(--filroden-color-danger);
+.character-tracker-window .character-tracker-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+    pointer-events: none;
 }
 
-.character-tracker-window .character-tracker-btn.primary {
-    color: var(--filroden-color-text-accent);
+.character-tracker-window .character-tracker-btn .character-tracker-icon {
+    color: var(--character-tracker-accent-main);
 }
 
-.character-tracker-window .character-tracker-btn.primary:hover {
-    color: var(--filroden-color-text-accent);
+/* Icon only: always carries an aria-label and a tooltip */
+.character-tracker-window .character-tracker-btn--square {
+    width: var(--character-tracker-control-height);
+    padding: 0;
 }
 
-/* --- STATISTICS BAR --- */
-.character-tracker-window .character-tracker-stats-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--filroden-space-m);
-    background-color: var(--filroden-color-bg-light);
-    border-radius: var(--filroden-radius-small);
-    padding: var(--filroden-space-s) var(--filroden-space-m);
-    margin-block-end: var(--filroden-space-m);
-    font-size: var(--filroden-font-size-xs);
-    border: 1px solid var(--filroden-color-border);
-}
-
-.character-tracker-window .stat-badge {
-    color: var(--filroden-color-text-main);
-}
-
-/* --- ACCORDION --- */
-.character-tracker-window .character-tracker-characters {
-    display: flex;
-    flex-direction: column;
-    gap: var(--filroden-space-m);
-}
-
-.character-tracker-window .character-tracker-accordion {
+/* No surface until hovered or open: for small controls beside a title */
+.character-tracker-window .character-tracker-btn--quiet {
+    border-color: transparent;
     background: transparent;
 }
 
-.character-tracker-window .accordion-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: var(--filroden-color-bg-hover);
-    padding: var(--filroden-space-s) var(--filroden-space-m);
-    border-radius: var(--filroden-radius-small);
+.character-tracker-window .character-tracker-btn--quiet[aria-expanded="true"] {
+    border-color: var(--character-tracker-accent-secondary);
+    background: var(--character-tracker-bg-highlight);
+}
+
+.character-tracker-window .character-tracker-btn--quiet[aria-expanded="true"] .character-tracker-icon {
+    color: var(--character-tracker-accent-secondary);
+}
+
+/* A toggle that is switched on */
+.character-tracker-window .character-tracker-btn[aria-pressed="true"] {
+    border-color: var(--character-tracker-accent-main);
+    background: var(--character-tracker-bg-highlight);
+}
+
+/* A destructive icon button: the icon alone carries the danger colour */
+.character-tracker-window .character-tracker-btn--icon-danger .character-tracker-icon {
+    color: var(--character-tracker-color-danger);
+}
+
+/* Delete, set apart at the foot of its surface: outlined in danger, filling on hover and focus */
+.character-tracker-window .character-tracker-btn--danger {
+    width: 100%;
+    border-color: var(--character-tracker-color-danger);
+    color: var(--character-tracker-color-danger);
+}
+
+.character-tracker-window .character-tracker-btn--danger .character-tracker-icon {
+    color: inherit;
+}
+
+.character-tracker-window .character-tracker-btn--danger:hover,
+.character-tracker-window .character-tracker-btn--danger:focus-visible {
+    border-color: var(--character-tracker-fill-negative);
+    background: var(--character-tracker-fill-negative);
+    color: #ffffff;
+}
+
+/* Segmented choice: equal-width options, the chosen one in the accent fill */
+.character-tracker-seg {
+    display: inline-grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: 2px;
+    padding: 2px;
+    border: 1px solid var(--character-tracker-border-strong);
+    border-radius: var(--character-tracker-radius-medium);
+    background: var(--character-tracker-bg-base);
+}
+
+.character-tracker-window .character-tracker-seg__option {
+    height: calc(var(--character-tracker-control-height) - 6px);
+    min-height: 0;
+    margin: 0;
+    padding: 0 var(--character-tracker-space-3);
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--character-tracker-text-secondary);
+    box-shadow: none;
+    font-family: var(--character-tracker-font-ui);
+    font-size: var(--character-tracker-text-m);
+    line-height: 1rem;
+    font-weight: 700;
+    white-space: nowrap;
     cursor: pointer;
-    font-weight: var(--filroden-font-weight-bold);
-    color: var(--filroden-color-text-accent);
-    margin-block-end: var(--filroden-space-s);
-    user-select: none;
-    transition: background-color 0.2s ease;
-    list-style: none; /* Removes native browser arrows */
 }
 
-.character-tracker-window .accordion-header::-webkit-details-marker {
-    display: none; /* Removes native Safari/Chrome arrows */
+.character-tracker-window .character-tracker-seg__option:hover {
+    background: var(--character-tracker-bg-hover);
+    color: var(--character-tracker-text-primary);
 }
 
-.character-tracker-window .accordion-header:hover {
-    background-color: var(--filroden-color-bg-hover-solid);
+.character-tracker-window .character-tracker-seg__option[aria-checked="true"] {
+    border-color: var(--character-tracker-fill-accent-edge);
+    background: var(--character-tracker-fill-accent);
+    color: var(--character-tracker-text-on-accent);
 }
 
-.character-tracker-window .accordion-title {
+/* ===================================================================
+   --- PLAYER LIST ---
+=================================================================== */
+.character-tracker-players {
+    flex: 0 0 13rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--character-tracker-space-2);
+    min-height: 0;
+    padding-block: var(--character-tracker-space-2) var(--character-tracker-space-3);
+    border-inline-end: 1px solid var(--character-tracker-border-main);
+    background: var(--character-tracker-bg-base);
+}
+
+.character-tracker-players__head {
     display: flex;
     align-items: center;
-    gap: var(--filroden-space-s);
+    justify-content: space-between;
+    gap: var(--character-tracker-space-2);
+    padding-inline: var(--character-tracker-space-3) var(--character-tracker-space-2);
 }
 
-.character-tracker-window .accordion-count {
-    background-color: var(--filroden-color-bg-darkest);
-    color: var(--filroden-color-text-muted);
-    padding: var(--filroden-space-xxs) var(--filroden-space-s);
-    border-radius: var(--filroden-radius-small);
-    border-radius: var(--filroden-radius-large);
-    font-size: var(--filroden-font-size-xs);
-}
-
-/* Updates the layout of log items nested within the accordion */
-.character-tracker-window .character-tracker-accordion .character-tracker-log-list {
-    padding-inline-start: var(--filroden-space-m);
-}
-
-.character-tracker-window .character-tracker-accordion .log-summary {
-    display: flex;
-    align-items: baseline;
-    gap: var(--filroden-space-s);
-    margin-block-end: var(--filroden-space-xxs);
-}
-
-/* --- CATEGORICAL NESTING --- */
-.character-tracker-window .character-tracker-categorical-view {
+.character-tracker-players__list {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: var(--filroden-space-s);
-    padding-inline-start: var(--filroden-space-m);
+    min-height: 0;
+    overflow-y: auto;
 }
 
-.character-tracker-window .sub-accordion {
-    border-inline-start: 2px solid var(--filroden-color-text-accent);
-    padding-inline-start: var(--filroden-space-s);
+.character-tracker-window .character-tracker-player {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--character-tracker-space-2);
+    width: 100%;
+    min-height: var(--character-tracker-row-height);
+    margin: 0;
+    padding: var(--character-tracker-space-1) var(--character-tracker-space-3);
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: var(--character-tracker-text-primary);
+    box-shadow: none;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    text-align: start;
+    cursor: pointer;
 }
 
-.character-tracker-window .entity-accordion {
-    margin-inline-start: var(--filroden-space-m);
-    border-inline-start: 1px dashed var(--filroden-color-border);
-    padding-inline-start: var(--filroden-space-s);
-    margin-block-start: var(--filroden-space-xs);
+.character-tracker-window .character-tracker-player:hover {
+    background: var(--character-tracker-bg-hover);
 }
 
-.character-tracker-window .character-tracker-entity-list {
+.character-tracker-player .character-tracker-icon {
+    color: var(--character-tracker-accent-main);
+}
+
+.character-tracker-player__name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* A player with nothing logged: still selectable, but quieter */
+.character-tracker-player--empty .character-tracker-player__name {
+    color: var(--character-tracker-text-muted);
+}
+
+/* The selected player: the selected surface with a bar in the secondary accent */
+.character-tracker-window .character-tracker-player[aria-current="true"] {
+    background: var(--character-tracker-bg-selected);
+}
+
+.character-tracker-player[aria-current="true"]::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: var(--character-tracker-selection-bar);
+    background: var(--character-tracker-accent-secondary);
+}
+
+.character-tracker-player[aria-current="true"] .character-tracker-icon {
+    color: var(--character-tracker-accent-secondary);
+}
+
+.character-tracker-players__foot {
+    padding: var(--character-tracker-space-2) var(--character-tracker-space-3) 0;
+    border-block-start: 1px solid var(--character-tracker-border-subtle);
+}
+
+/* ===================================================================
+   --- APPEARANCE MENU ---
+   A popover anchored to its button. It is opened and closed in place by
+   AuditLogApp.js (no re-render), and closes on Escape or a click outside.
+=================================================================== */
+.character-tracker-appearance {
+    position: relative;
+}
+
+.character-tracker-popover {
+    position: absolute;
+    z-index: 10;
+    inset-block-start: calc(100% + var(--character-tracker-space-1));
+    inset-inline-start: 0;
+    min-width: 11rem;
+    padding-block: var(--character-tracker-space-1);
+    border: 1px solid var(--character-tracker-border-main);
+    border-radius: var(--character-tracker-radius-large);
+    background: var(--character-tracker-bg-panel);
+    box-shadow: var(--character-tracker-shadow-popout);
+}
+
+.character-tracker-popover[hidden] {
+    display: none;
+}
+
+.character-tracker-menu-head {
+    padding: 0.375rem var(--character-tracker-space-3) var(--character-tracker-space-1);
+    color: var(--character-tracker-text-secondary);
+    font-size: var(--character-tracker-text-xs);
+    line-height: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.character-tracker-window .character-tracker-menu-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--character-tracker-space-2);
+    width: 100%;
+    min-height: var(--character-tracker-row-height);
+    margin: 0;
+    padding: var(--character-tracker-space-1) var(--character-tracker-space-3);
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: var(--character-tracker-text-primary);
+    box-shadow: none;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    text-align: start;
+    cursor: pointer;
+}
+
+.character-tracker-window .character-tracker-menu-item:hover {
+    background: var(--character-tracker-bg-hover);
+}
+
+.character-tracker-window .character-tracker-menu-item[aria-checked="true"] {
+    background: var(--character-tracker-bg-selected);
+}
+
+.character-tracker-menu-item[aria-checked="true"]::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: var(--character-tracker-selection-bar);
+    background: var(--character-tracker-accent-secondary);
+}
+
+/* A tick box: the accent fill with a check when on */
+.character-tracker-tick {
+    position: relative;
+    flex: 0 0 auto;
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid var(--character-tracker-border-strong);
+    border-radius: var(--character-tracker-radius-small);
+}
+
+.character-tracker-tick--on {
+    border-color: var(--character-tracker-fill-accent-edge);
+    background: var(--character-tracker-fill-accent);
+}
+
+.character-tracker-tick--on::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 1px;
+    inset-inline-start: 4px;
+    width: 4px;
+    height: 8px;
+    border: solid var(--character-tracker-text-on-accent);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Fixed swatches: they show each hue as it appears, whichever hue is active */
+.character-tracker-swatch {
+    flex: 0 0 auto;
+    width: 0.875rem;
+    height: 0.875rem;
+    border: 1px solid var(--character-tracker-border-strong);
+    border-radius: var(--character-tracker-radius-small);
+}
+
+.character-tracker-swatch--gold { background: #ceb13b; }
+.character-tracker-swatch--blue { background: #3b91ce; }
+
+.character-tracker-menu-hint {
+    margin: var(--character-tracker-space-1) 0 0;
+    padding: var(--character-tracker-space-1) var(--character-tracker-space-3) 0.375rem;
+    border-block-start: 1px solid var(--character-tracker-border-subtle);
+    color: var(--character-tracker-text-muted);
+    font-size: var(--character-tracker-text-s);
+    line-height: 1rem;
+}
+
+/* ===================================================================
+   --- CONTEXT BAR ---
+   Above the log: the selected player, their stats, their actions and the
+   ways of arranging their log.
+=================================================================== */
+.character-tracker-main {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: var(--filroden-space-xs);
+    min-width: 0;
+    min-height: 0;
+}
+
+.character-tracker-context {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--character-tracker-space-2) var(--character-tracker-space-3);
+    padding: 0.625rem var(--character-tracker-space-3);
+    border-block-end: 1px solid var(--character-tracker-border-main);
+    background: var(--character-tracker-bg-panel);
+}
+
+.character-tracker-context__title {
+    flex: 1 1 12rem;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.character-tracker-stats {
+    color: var(--character-tracker-text-secondary);
+    font-size: var(--character-tracker-text-s);
+    line-height: 1rem;
+}
+
+.character-tracker-context__actions {
+    display: flex;
+    gap: 0.375rem;
+}
+
+.character-tracker-context__modes {
+    flex: 1 0 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--character-tracker-space-2);
+}
+
+/* ===================================================================
+   --- LOG ---
+=================================================================== */
+.character-tracker-log {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--character-tracker-space-3);
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--character-tracker-space-3);
+}
+
+.character-tracker-log-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* --- Character cards --- */
+.character-tracker-card {
+    flex: 0 0 auto;
+    overflow: hidden;
+    border: 1px solid var(--character-tracker-border-main);
+    border-radius: var(--character-tracker-radius-large);
+    background: var(--character-tracker-bg-panel);
+}
+
+.character-tracker-card__summary,
+.character-tracker-entity__summary {
+    display: flex;
+    align-items: center;
+    gap: var(--character-tracker-space-2);
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Hides the browser's own disclosure marker; the chevron icon replaces it */
+.character-tracker-card__summary::-webkit-details-marker,
+.character-tracker-entity__summary::-webkit-details-marker {
+    display: none;
+}
+
+.character-tracker-card__summary {
+    min-height: 2.5rem;
+    padding: 0.375rem var(--character-tracker-space-3);
+    background: var(--character-tracker-bg-raised);
+}
+
+.character-tracker-card__summary:hover,
+.character-tracker-entity__summary:hover {
+    background: var(--character-tracker-bg-hover);
+}
+
+.character-tracker-card[open] > .character-tracker-card__summary {
+    border-block-end: 1px solid var(--character-tracker-border-subtle);
+}
+
+.character-tracker-card__summary .character-tracker-icon {
+    color: var(--character-tracker-accent-main);
+}
+
+.character-tracker-card__name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--character-tracker-font-display);
+    font-size: var(--character-tracker-text-l);
+    line-height: 1.25rem;
+    font-weight: 600;
+}
+
+.character-tracker-card__body {
+    padding-block: var(--character-tracker-space-1) var(--character-tracker-space-2);
+}
+
+/* The disclosure chevron points along the reading direction when closed, and down when open */
+.character-tracker-window .character-tracker-card__summary .character-tracker-chevron,
+.character-tracker-window .character-tracker-entity__summary .character-tracker-chevron {
+    color: var(--character-tracker-text-secondary);
+    transform: scaleX(var(--character-tracker-dir-flip));
+    transition: transform 0.15s ease;
+}
+
+.character-tracker-card[open] > .character-tracker-card__summary .character-tracker-chevron,
+.character-tracker-entity[open] > .character-tracker-entity__summary .character-tracker-chevron {
+    transform: rotate(90deg);
+}
+
+/* --- Categorical groups and entities --- */
+.character-tracker-group__title {
+    display: flex;
+    align-items: center;
+    gap: var(--character-tracker-space-2);
+    padding: 0.625rem var(--character-tracker-space-3) var(--character-tracker-space-1);
+}
+
+.character-tracker-entity__summary {
+    min-height: var(--character-tracker-row-height);
+    padding: var(--character-tracker-space-1) var(--character-tracker-space-3);
+    padding-inline-start: var(--character-tracker-space-6);
+}
+
+.character-tracker-entity__name {
+    flex: 1;
+    min-width: 0;
+    font-weight: 700;
+}
+
+/* --- Entries --- */
+.character-tracker-entry {
+    display: grid;
+    grid-template-columns: 4.75rem minmax(0, 1fr);
+    column-gap: var(--character-tracker-space-2);
+    padding: 0.375rem var(--character-tracker-space-3);
+    border-block-start: 1px solid var(--character-tracker-border-subtle);
+}
+
+.character-tracker-entry:first-child {
+    border-block-start: none;
+}
+
+/* A single change shown straight under its group, level with the entity rows */
+.character-tracker-log-list--indent .character-tracker-entry {
+    padding-inline-start: var(--character-tracker-space-6);
+}
+
+/* The changes inside an open entity, one step further in */
+.character-tracker-log-list--nested .character-tracker-entry {
+    padding-inline-start: 2.75rem;
+}
+
+.character-tracker-entry__time {
+    color: var(--character-tracker-text-muted);
+    font-size: var(--character-tracker-text-m);
+    line-height: 1.125rem;
+}
+
+.character-tracker-entry__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.character-tracker-entry__action {
+    font-weight: 700;
+}
+
+.character-tracker-entry__detail {
+    grid-column: 2;
+    color: var(--character-tracker-text-secondary);
+    overflow-wrap: anywhere;
+}
+
+/* Each changed value of a data entry on its own line */
+.character-tracker-entry__part {
+    display: block;
+}
+
+.character-tracker-entry__value {
+    margin-inline-start: 0.375rem;
+    color: var(--character-tracker-text-primary);
+    font-size: var(--character-tracker-text-l);
+}
+
+/* --- Reverted changes ---
+   Entries (or single changes within an entry) that the same player later
+   undid. Faded and struck through so they read as history rather than as
+   the character's current state. Whole entries are only seen with reverted
+   changes expanded. */
+.character-tracker-entry--reverted,
+.character-tracker-entry__part--reverted {
+    opacity: 0.6;
+}
+
+.character-tracker-entry__part--reverted {
+    text-decoration: line-through;
+}
+
+/* Inside a reverted entry the entry itself is already faded; fading each part again would halve it */
+.character-tracker-entry--reverted .character-tracker-entry__part--reverted {
+    opacity: 1;
+}
+
+/* One line standing in for a set of folded changes. Dashed so it reads as a
+   placeholder rather than a change in its own right. */
+.character-tracker-entry--summary {
+    margin: var(--character-tracker-space-1) var(--character-tracker-space-3);
+    padding: 0.375rem var(--character-tracker-space-2);
+    border: 1px dashed var(--character-tracker-border-strong);
+    border-radius: var(--character-tracker-radius-medium);
+}
+
+.character-tracker-entry--summary + .character-tracker-entry {
+    border-block-start: none;
+}
+
+.character-tracker-entry--summary .character-tracker-entry__action {
+    color: var(--character-tracker-text-secondary);
+}
+
+/* --- State marks: an icon and a word, coloured by meaning --- */
+.character-tracker-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--character-tracker-space-1);
+    padding: 0 var(--character-tracker-space-1);
+    border: 1px solid currentColor;
+    border-radius: var(--character-tracker-radius-small);
+    font-size: var(--character-tracker-text-xs);
+    line-height: 0.875rem;
+    font-weight: 700;
+}
+
+/* Asks the GM to check the entry: a player could have edited it before it reached the log */
+.character-tracker-mark--no-gm {
+    color: var(--character-tracker-color-warning);
+}
+
+/* A fact, not a warning: neutral */
+.character-tracker-mark--reverted {
+    color: var(--character-tracker-text-secondary);
+}
+
+/* ===================================================================
+   --- CONFIRMATION DIALOGUES ---
+   Foundry draws the dialogue; only its confirming button takes the
+   negative tone, because every confirmation here deletes something.
+=================================================================== */
+.character-tracker-dialog button[data-action="yes"] {
+    border-color: var(--character-tracker-fill-negative);
+    background: var(--character-tracker-fill-negative);
+    color: #ffffff;
+}
+
+/* ===================================================================
+   --- NARROW WINDOWS ---
+   Below 40rem of window width the player list narrows and each entry
+   stacks its time above its action, so the detail keeps a usable width.
+=================================================================== */
+@container character-tracker-layout (max-width: 40rem) {
+    .character-tracker-players {
+        flex-basis: 10rem;
+    }
+
+    .character-tracker-entry {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .character-tracker-entry__detail {
+        grid-column: 1;
+    }
+
+    .character-tracker-entry__time {
+        font-size: var(--character-tracker-text-s);
+    }
+}
+
+/* ===================================================================
+   --- TOUCH ---
+   Larger targets on a coarse pointer.
+=================================================================== */
+@media (pointer: coarse) {
+    .character-tracker-window {
+        --character-tracker-control-height: 2.5rem;
+        --character-tracker-row-height: 2.75rem;
+    }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "visage",
+  "name": "character-tracker",
   "type": "module",
   "scripts": {
     "pack": "node scripts/pack.mjs",
